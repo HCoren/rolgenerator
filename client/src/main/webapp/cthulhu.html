@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html ng-app="cthulhuApp">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Llamada de Cthulhu - Creación de Personaje</title>
+
+<!-- CSS de Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+<!-- Scripts de angular, jQuery y Bootstrap -->
+<script src="js/angular.js">
+	
+</script>
+<script src="js/jquery-1.12.3.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<!-- Script propio de la página -->
+<script src="js/application/cthulhu.js">
+	
+</script>
+</head>
+
+<body ng-controller="cthulhuAppCtrl" ng-init="inicializar()">
+
+	<img src="images/application/cthulhu-right.jpg" align="right"></img>
+	<img src="images/application/cthulhu-left.jpg" align="left"></img>
+
+	<div class="container center-block">
+
+		<!-- Navegación -->
+		<nav class="navbar navbar-default navbar-fixed-top">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="home.html">Rol Generator</a>
+				</div>
+				<div id="navbar" class="navbar-collapse collapse">
+					<ul class="nav navbar-nav">
+						<li class="dropdown active"><a href="#"
+							class="dropdown-toggle" data-toggle="dropdown" role="button"
+							aria-haspopup="true" aria-expanded="false">Juegos<span
+								class="caret"></span></a>
+							<ul class="dropdown-menu" class="active">
+								<li><a href="l5a.html">La leyenda de los cinco anillos</a></li>
+								<li><a href="cthulhu.html">La llamada de Cthulhu</a></li>
+							</ul></li>
+						<li><a href="shop.html">Enlaces de Compra</a></li>
+						<li><a href="contactUs.html">Contacto</a></li>
+						<li><a href="actualizaciones.html">Próximas
+								actualizaciones</a></li>
+						<li><a href="descargas.html">Descargas</a></li>
+					</ul>
+					<div class="navbar-right navbar-text">
+						<a class="navbar-link" href="registration.html">Regístrate</a>
+					</div>
+				</div>
+			</div>
+		</nav>
+
+		<!-- Modal que contiene las instrucciones de uso -->
+		<div class="modal fade" id="instrucciones" tabindex="-1" role="dialog"
+			aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">
+							<span class="glyphicon glyphicon-remove" style="color: #FFF;"></span>
+						</button>
+						<h4 class="modal-title">INSTRUCCIONES</h4>
+					</div>
+					<div class="modal-body">
+						<p>
+							1. Selecciona unos valores iniciales para FUE, CON, TAM, DES,
+							APA, INT, POD y EDU o haga click en el botón de 'Aleatorio' al
+							lado de las características para que se rellenen automáticamente.
+							<br /> <br /> 2. Seleccione una profesión. <br /> <br /> 3.
+							Haga click en el botón de 'Play' y siga los pasos que se le
+							indiquen. <br /> <br /> 4. Para generar un nuevo personaje
+							pulse F5 o re-cargue la página.
+						</p>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">Close</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal que contiene los valores a restar en caso de que el campo edad contenga un valor alto -->
+		<div class="modal fade" id="restar" tabindex="-1" role="dialog"
+			aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">
+							<span class="glyphicon glyphicon-remove" style="color: #FFF;"></span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p>
+							Debido a tu edad debes disminuir {{restarPuntos}} puntos en las
+							siguientes características.<br /> <br /> Por favor selecciona
+							cuantos puntos disminuir de cada una: <br /> <br />
+						</p>
+						<form class="form" role="form">
+							<div class="form-group">
+								<label><b>FUE</b></label> <input class="form-control"
+									type="number" min="0"
+									max="{{restarPuntos-conResta-desResta-apaResta}}"
+									ng-model="fueResta" id="fueResta">
+							</div>
+							<div class="form-group">
+								<label><b>CON</b></label> <input class="form-control"
+									type="number" min="0"
+									max="{{restarPuntos-fueResta-desResta-apaResta}}"
+									ng-model="conResta" id="conResta">
+							</div>
+							<div class="form-group">
+								<label><b>DES</b></label> <input class="form-control"
+									type="number" min="0"
+									max="{{restarPuntos-conResta-fueResta-apaResta}}"
+									ng-model="desResta" id="desResta">
+							</div>
+							<div class="form-group">
+								<label><b>APA</b></label> <input class="form-control"
+									type="number" min="0"
+									max="{{restarPuntos-conResta-desResta-fueResta}}"
+									ng-model="apaResta" id="apaResta">
+							</div>
+						</form>
+						<div class="modal-footer">
+							<button ng-click="calcularHabilidades()" type="button"
+								class="btn btn-default">Close</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Modal para la distribución de los puntos de experiencia otorgados por la profesión escogida -->
+		<div class="modal fade" id="sumar" tabindex="-1" role="dialog"
+			aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">
+							<span class="glyphicon glyphicon-remove" style="color: #FFF;"></span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<p style="text-align: center">
+							Tiene {{edu*20}} puntos a repartir entre las habilidades propias
+							de su profesión (seleccione una de las que aparecen en blanco): <br />
+							<br />
+						</p>
+						<form id="selectPic" class="form-horizontal" role="form">
+							<div class="form-group">
+								<select class="form-control" id="textoHab1"
+									ng-change="checkSubValue(1)" ng-disabled="textoHab1!=null"
+									ng-model="textoHab1"
+									ng-options="option.name as option.value for option in hab1List"></select>
+								<input class="form-control" type="text" id="textoHab1_aux"
+									ng-model="textoHab1_aux" placeholder="SubHabilidad"
+									style="display: none"> <input class="form-control"
+									type="number" min="0"
+									max="{{(edu*20)-valorHab2-valorHab3-valorHab4-valorHab5-valorHab6-valorHab7-valorHab8}}"
+									ng-model="valorHab1" id="valorHab1">
+							</div>
+							<div class="form-group">
+								<select class="form-control" id="textoHab2"
+									ng-change="checkSubValue(2)" ng-disabled="textoHab2!=null"
+									ng-model="textoHab2"
+									ng-options="option.name as option.value for option in hab2List"></select>
+								<input class="form-control" type="text" id="textoHab2_aux"
+									ng-model="textoHab2_aux" placeholder="SubHabilidad"
+									style="display: none"> <input class="form-control"
+									type="number" min="0"
+									max="{{(edu*20)-valorHab1-valorHab3-valorHab4-valorHab5-valorHab6-valorHab7-valorHab8}}"
+									ng-model="valorHab2" id="valorHab2">
+							</div>
+							<div class="form-group">
+								<select class="form-control" id="textoHab3"
+									ng-change="checkSubValue(3)" ng-disabled="textoHab3!=null"
+									ng-model="textoHab3"
+									ng-options="option.name as option.value for option in hab3List"></select>
+								<input class="form-control" type="text" id="textoHab3_aux"
+									ng-model="textoHab3_aux" placeholder="SubHabilidad"
+									style="display: none"> <input class="form-control"
+									type="number" min="0"
+									max="{{(edu*20)-valorHab2-valorHab1-valorHab4-valorHab5-valorHab6-valorHab7-valorHab8}}"
+									ng-model="valorHab3" id="valorHab3">
+							</div>
+							<div class="form-group">
+								<select class="form-control" id="textoHab4"
+									ng-change="checkSubValue(4)" ng-disabled="textoHab4!=null"
+									ng-model="textoHab4"
+									ng-options="option.name as option.value for option in hab4List"></select>
+								<input class="form-control" type="text" id="textoHab4_aux"
+									ng-model="textoHab4_aux" placeholder="SubHabilidad"
+									style="display: none"> <input class="form-control"
+									type="number" min="0"
+									max="{{(edu*20)-valorHab2-valorHab3-valorHab1-valorHab5-valorHab6-valorHab7-valorHab8}}"
+									ng-model="valorHab4" id="valorHab4">
+							</div>
+							<div class="form-group">
+								<select class="form-control" id="textoHab5"
+									ng-change="checkSubValue(5)" ng-disabled="textoHab5!=null"
+									ng-model="textoHab5"
+									ng-options="option.name as option.value for option in hab5List"></select>
+								<input class="form-control" type="text" id="textoHab5_aux"
+									ng-model="textoHab5_aux" placeholder="SubHabilidad"
+									style="display: none"> <input class="form-control"
+									type="number" min="0"
+									max="{{(edu*20)-valorHab2-valorHab3-valorHab4-valorHab1-valorHab6-valorHab7-valorHab8}}"
+									ng-model="valorHab5" id="valorHab5">
+							</div>
+							<div class="form-group">
+								<select class="form-control" id="textoHab6"
+									ng-change="checkSubValue(6)" ng-disabled="textoHab6!=null"
+									ng-model="textoHab6"
+									ng-options="option.name as option.value for option in hab6List"></select>
+								<input class="form-control" type="text" id="textoHab6_aux"
+									ng-model="textoHab6_aux" placeholder="SubHabilidad"
+									style="display: none"> <input class="form-control"
+									type="number" min="0"
+									max="{{(edu*20)-valorHab2-valorHab3-valorHab4-valorHab5-valorHab1-valorHab7-valorHab8}}"
+									ng-model="valorHab6" id="valorHab6">
+							</div>
+							<div class="form-group">
+								<select class="form-control" id="textoHab7"
+									ng-change="checkSubValue(7)" ng-disabled="textoHab7!=null"
+									ng-model="textoHab7"
+									ng-options="option.name as option.value for option in hab7List"></select>
+								<input class="form-control" type="text" id="textoHab7_aux"
+									ng-model="textoHab7_aux" placeholder="SubHabilidad"
+									style="display: none"> <input class="form-control"
+									type="number" min="0"
+									max="{{(edu*20)-valorHab2-valorHab3-valorHab4-valorHab5-valorHab6-valorHab1-valorHab8}}"
+									ng-model="valorHab7" id="valorHab7">
+							</div>
+							<div class="form-group">
+								<select class="form-control" id="textoHab8"
+									ng-change="checkSubValue(8)" ng-disabled="textoHab8!=null"
+									ng-model="textoHab8"
+									ng-options="option.name as option.value for option in hab8List"></select>
+								<input class="form-control" type="text" id="textoHab8_aux"
+									ng-model="textoHab8_aux" placeholder="SubHabilidad"
+									style="display: none"> <input class="form-control"
+									type="number" min="0"
+									max="{{(edu*20)-valorHab2-valorHab3-valorHab4-valorHab5-valorHab6-valorHab7-valorHab1}}"
+									ng-model="valorHab8" id="valorHab8">
+							</div>
+						</form>
+						<div class="modal-footer">
+							<button ng-click="sumarPuntos()" type="button"
+								class="btn btn-default">Close</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Contenedor con la ficha del personaje -->
+		<div id="ficha" style="position: absolute; top: 10%; margin: 5%">
+			<!-- Usamos la imagen como plantilla para colocar todos los elementos -->
+			<img src="images/application/cthulhu.png" align="center"
+				style="width: 140%; z-index: 3"></img>
+
+			<!-- Datos del personaje - Se calculan dinámicamente con Oracle y angular -->
+			<div id="datosPersonaje">
+				<input type="text" id="nombre" size="38.5%" placeholder="Nombre"
+					style="background: none; position: absolute; height: 1.7%; top: 1.5%; left: 30%">
+				<input type="text" id="jugador" size="20%" placeholder="Jugador"
+					style="-webkit-transform: rotate(180deg); -moz-transform: rotate(-90deg); -ms-transform: rotate(-90deg); -o-transform: rotate(-90deg); transform: rotate(-90deg); background: none; position: absolute; height: 2%; top: 23.5%; left: -1.2%">
+				<select id="profesion" ng-model="profesion"
+					ng-options="option.name as option.value for option in profesionesList"
+					style="background: none; width: 41%; position: absolute; top: 3.5%; left: 30%"></select>
+				<input type="text" id="titulos" size="25.5%" placeholder="Títulos"
+					style="background: none; position: absolute; height: 1.7%; top: 5.25%; left: 42.5%">
+				<input type="text" id="nacimiento" size="25.5%"
+					placeholder="Lugar de Nacimiento"
+					style="background: none; position: absolute; height: 1.7%; top: 7.1%; left: 42.5%">
+				<input type="text" id="trastornos" size="25.5%"
+					placeholder="Trastornos"
+					style="background: none; position: absolute; height: 1.7%; top: 8.95%; left: 42.5%">
+				<input type="radio" name="sexo" id="hombre" value="H"
+					style="position: absolute; height: 1.7%; top: 10.4%; left: 28%"><label
+					for="hombre"
+					style="position: absolute; height: 1.7%; top: 10.7%; left: 30.5%">H</label>
+				<input type="radio" name="sexo" id="mujer" value="M"
+					style="position: absolute; height: 1.7%; top: 10.4%; left: 35%"><label
+					for="mujer"
+					style="position: absolute; height: 1.7%; top: 10.7%; left: 37.5%">M</label>
+				<input type="number" min="{{edu+6}}" max="100" ng-model="edad"
+					value="{{edu+6}}" id="edad"
+					style="text-align: center; background: none; height: 1.7%; width: 10%; position: absolute; top: 10.8%; left: 55%">
+			</div>
+
+			<!-- Características del personaje - Se calculan dinámicamente con Oracle y angular -->
+			<div id="caracteristicas">
+				<input type="number" min="3" max="18" ng-model="fue"
+					ng-style="fueStyle" id="fue"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 5.4%; left: 85.4%">
+				<input type="number" min="3" max="18" ng-model="con"
+					ng-style="conStyle" ng-change="calcularVida()" id="con"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 7.25%; left: 85.4%">
+				<input type="number" min="8" max="18" ng-model="tam"
+					ng-style="tamStyle" ng-change="calcularVida()" id="tam"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 9.15%; left: 85.4%">
+				<input type="number" min="3" max="18" ng-model="des"
+					ng-style="desStyle" id="des"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 5.4%; left: 99.3%">
+				<input type="number" min="3" max="18" ng-model="apa"
+					ng-style="apaStyle" id="apa"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 7.25%; left: 99.3%">
+				<input type="number" value={{pod*5}} ng-model="cor" id="tam"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 9.15%; left: 99.3%"
+					readonly=""> <input type="number" min="8" max="18"
+					ng-model="inte" ng-style="inteStyle" id="inte"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 5.4%; left: 113.2%">
+				<input type="number" min="3" max="18" ng-model="pod"
+					ng-style="podStyle" ng-change="calcularCorduraMagia()" id="pod"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 7.25%; left: 113.2%">
+				<input type="number" min="6" max="21" ng-model="edu"
+					ng-style="eduStyle" id="edu"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 9.15%; left: 113.2%">
+				<input type="number" value={{inte*5}} ng-model="idea" id="idea"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 5.4%; left: 129.1%"
+					readonly=""> <input type="number" value={{pod*5}}
+					ng-model="suerte" id="suerte"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 7.25%; left: 129.1%"
+					readonly=""> <input type="number" value={{edu*5}}
+					ng-model="conoc" id="conoc"
+					style="text-align: center; background: none; height: 1.7%; width: 5.5%; position: absolute; top: 9.15%; left: 129.1%"
+					readonly=""> <input type="number"
+					value="{{99-MitosdeCthulhu}}" id="cthulhu"
+					style="text-align: center; background: none; height: 1.4%; width: 5.5%; position: absolute; top: 10.95%; left: 99.3%"
+					readonly=""> <input type="text" ng-model="bonif" id="bonif"
+					style="text-align: center; background: none; height: 1.4%; width: 7%; position: absolute; top: 10.95%; left: 123.3%">
+
+			</div>
+
+			<!-- Para marcar los distintos puntos de los que dispone el personaje se utilizan círculos que se rellenan dinámicamente -->
+			<div id="puntos">
+				<div id="cordura">
+					<input type="text" ng-model="circuloCordura_Locura"
+						ng-style="corduraStyle_Locura" id="circuloCordura_Locura"
+						style="border: none; height: 1.8%; width: 7%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 17.6%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_0" ng-style="corduraStyle_0"
+						id="circuloCordura_0"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 24.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_1" ng-style="corduraStyle_1"
+						id="circuloCordura_1"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 28.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_2" ng-style="corduraStyle_2"
+						id="circuloCordura_2"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 31.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_3" ng-style="corduraStyle_3"
+						id="circuloCordura_3"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 34.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_4" ng-style="corduraStyle_4"
+						id="circuloCordura_4"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 38.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_5" ng-style="corduraStyle_5"
+						id="circuloCordura_5"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 41.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_6" ng-style="corduraStyle_6"
+						id="circuloCordura_6"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 44.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_7" ng-style="corduraStyle_7"
+						id="circuloCordura_7"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 48.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_8" ng-style="corduraStyle_8"
+						id="circuloCordura_8"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 51.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_9" ng-style="corduraStyle_9"
+						id="circuloCordura_9"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 54.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_10" ng-style="corduraStyle_10"
+						id="circuloCordura_10"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 58.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_11" ng-style="corduraStyle_11"
+						id="circuloCordura_11"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 61.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_12" ng-style="corduraStyle_12"
+						id="circuloCordura_12"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 64.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_13" ng-style="corduraStyle_13"
+						id="circuloCordura_13"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 68.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_14" ng-style="corduraStyle_14"
+						id="circuloCordura_14"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 71.55%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_15" ng-style="corduraStyle_15"
+						id="circuloCordura_15"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 18.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_16" ng-style="corduraStyle_16"
+						id="circuloCordura_16"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 21.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_17" ng-style="corduraStyle_17"
+						id="circuloCordura_17"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 24.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_18" ng-style="corduraStyle_18"
+						id="circuloCordura_18"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 28.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_19" ng-style="corduraStyle_19"
+						id="circuloCordura_19"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 31.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_20" ng-style="corduraStyle_20"
+						id="circuloCordura_20"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 34.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_21" ng-style="corduraStyle_21"
+						id="circuloCordura_21"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 38.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_22" ng-style="corduraStyle_22"
+						id="circuloCordura_22"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 41.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_23" ng-style="corduraStyle_23"
+						id="circuloCordura_23"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 44.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_24" ng-style="corduraStyle_24"
+						id="circuloCordura_24"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 48.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_25" ng-style="corduraStyle_25"
+						id="circuloCordura_25"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 51.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_26" ng-style="corduraStyle_26"
+						id="circuloCordura_26"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 54.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_27" ng-style="corduraStyle_27"
+						id="circuloCordura_27"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 58.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_28" ng-style="corduraStyle_28"
+						id="circuloCordura_28"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 61.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_29" ng-style="corduraStyle_29"
+						id="circuloCordura_29"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 64.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_30" ng-style="corduraStyle_30"
+						id="circuloCordura_30"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 68.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_31" ng-style="corduraStyle_31"
+						id="circuloCordura_31"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 71.55%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_32" ng-style="corduraStyle_32"
+						id="circuloCordura_17"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 18.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_33" ng-style="corduraStyle_33"
+						id="circuloCordura_17"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 21.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_34" ng-style="corduraStyle_34"
+						id="circuloCordura_17"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 24.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_35" ng-style="corduraStyle_35"
+						id="circuloCordura_18"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 28.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_36" ng-style="corduraStyle_36"
+						id="circuloCordura_19"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 31.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_37" ng-style="corduraStyle_37"
+						id="circuloCordura_20"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 34.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_38" ng-style="corduraStyle_38"
+						id="circuloCordura_21"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 38.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_39" ng-style="corduraStyle_39"
+						id="circuloCordura_22"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 41.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_40" ng-style="corduraStyle_40"
+						id="circuloCordura_23"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 44.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_41" ng-style="corduraStyle_41"
+						id="circuloCordura_24"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 48.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_42" ng-style="corduraStyle_42"
+						id="circuloCordura_25"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 51.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_43" ng-style="corduraStyle_43"
+						id="circuloCordura_26"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 54.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_44" ng-style="corduraStyle_44"
+						id="circuloCordura_27"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 58.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_45" ng-style="corduraStyle_45"
+						id="circuloCordura_28"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 61.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_46" ng-style="corduraStyle_46"
+						id="circuloCordura_29"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 64.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_47" ng-style="corduraStyle_47"
+						id="circuloCordura_30"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 68.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_48" ng-style="corduraStyle_48"
+						id="circuloCordura_31"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 71.55%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_49" ng-style="corduraStyle_49"
+						id="circuloCordura_49"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 18.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_50" ng-style="corduraStyle_50"
+						id="circuloCordura_50"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 21.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_51" ng-style="corduraStyle_51"
+						id="circuloCordura_51"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 24.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_52" ng-style="corduraStyle_52"
+						id="circuloCordura_52"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 28.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_53" ng-style="corduraStyle_53"
+						id="circuloCordura_53"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 31.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_54" ng-style="corduraStyle_54"
+						id="circuloCordura_54"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 34.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_55" ng-style="corduraStyle_55"
+						id="circuloCordura_55"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 38.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_56" ng-style="corduraStyle_56"
+						id="circuloCordura_56"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 41.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_57" ng-style="corduraStyle_57"
+						id="circuloCordura_57"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 44.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_58" ng-style="corduraStyle_58"
+						id="circuloCordura_58"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 48.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_59" ng-style="corduraStyle_59"
+						id="circuloCordura_59"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 51.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_60" ng-style="corduraStyle_60"
+						id="circuloCordura_60"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 54.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_61" ng-style="corduraStyle_61"
+						id="circuloCordura_61"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 58.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_62" ng-style="corduraStyle_62"
+						id="circuloCordura_62"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 61.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_63" ng-style="corduraStyle_63"
+						id="circuloCordura_63"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 64.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_64" ng-style="corduraStyle_64"
+						id="circuloCordura_64"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 68.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_65" ng-style="corduraStyle_65"
+						id="circuloCordura_65"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 71.55%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_66" ng-style="corduraStyle_66"
+						id="circuloCordura_66"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 18.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_67" ng-style="corduraStyle_67"
+						id="circuloCordura_67"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 21.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_68" ng-style="corduraStyle_68"
+						id="circuloCordura_68"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 24.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_69" ng-style="corduraStyle_69"
+						id="circuloCordura_69"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 28.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_70" ng-style="corduraStyle_70"
+						id="circuloCordura_70"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 31.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_71" ng-style="corduraStyle_71"
+						id="circuloCordura_71"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 34.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_72" ng-style="corduraStyle_72"
+						id="circuloCordura_72"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 38.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_73" ng-style="corduraStyle_73"
+						id="circuloCordura_73"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 41.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_74" ng-style="corduraStyle_74"
+						id="circuloCordura_74"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 44.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_75" ng-style="corduraStyle_75"
+						id="circuloCordura_75"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 48.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_76" ng-style="corduraStyle_76"
+						id="circuloCordura_76"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 51.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_77" ng-style="corduraStyle_77"
+						id="circuloCordura_77"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 54.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_78" ng-style="corduraStyle_78"
+						id="circuloCordura_78"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 58.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_79" ng-style="corduraStyle_79"
+						id="circuloCordura_79"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 61.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_80" ng-style="corduraStyle_80"
+						id="circuloCordura_80"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 64.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_81" ng-style="corduraStyle_81"
+						id="circuloCordura_81"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 68.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_82" ng-style="corduraStyle_82"
+						id="circuloCordura_82"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 71.55%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_83" ng-style="corduraStyle_83"
+						id="circuloCordura_83"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 18.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_84" ng-style="corduraStyle_84"
+						id="circuloCordura_84"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 21.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_85" ng-style="corduraStyle_85"
+						id="circuloCordura_85"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 24.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_86" ng-style="corduraStyle_86"
+						id="circuloCordura_86"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 28.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_87" ng-style="corduraStyle_87"
+						id="circuloCordura_87"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 31.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_88" ng-style="corduraStyle_88"
+						id="circuloCordura_88"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 34.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_89" ng-style="corduraStyle_89"
+						id="circuloCordura_89"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 38.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_90" ng-style="corduraStyle_90"
+						id="circuloCordura_90"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 41.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_91" ng-style="corduraStyle_91"
+						id="circuloCordura_91"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 44.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_92" ng-style="corduraStyle_92"
+						id="circuloCordura_92"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 48.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_93" ng-style="corduraStyle_93"
+						id="circuloCordura_93"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 51.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_94" ng-style="corduraStyle_94"
+						id="circuloCordura_94"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 54.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_95" ng-style="corduraStyle_95"
+						id="circuloCordura_95"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 58.2%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_96" ng-style="corduraStyle_96"
+						id="circuloCordura_96"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 61.5%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_97" ng-style="corduraStyle_97"
+						id="circuloCordura_97"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 64.8%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_98" ng-style="corduraStyle_98"
+						id="circuloCordura_98"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 68.1%"
+						readonly=""> <input type="text"
+						ng-model="circuloCordura_99" ng-style="corduraStyle_99"
+						id="circuloCordura_99"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 71.55%"
+						readonly="">
+				</div>
+				<div id="magia">
+					<input type="text" ng-model="circuloMagia_Inconsciente"
+						ng-style="magiaStyle_Inconsciente" id="circuloMagia_Inconsciente"
+						style="border: none; height: 1.8%; width: 15%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 78%"
+						readonly=""> <input type="text" ng-model="circuloMagia_0"
+						ng-style="magiaStyle_0" id="circuloMagia_0"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 92.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_1"
+						ng-style="magiaStyle_1" id="circuloMagia_1"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 95.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_2"
+						ng-style="magiaStyle_2" id="circuloMagia_2"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 99.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_3"
+						ng-style="magiaStyle_3" id="circuloMagia_3"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 102.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_4"
+						ng-style="magiaStyle_4" id="circuloMagia_4"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 79.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_5"
+						ng-style="magiaStyle_5" id="circuloMagia_5"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 82.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_6"
+						ng-style="magiaStyle_6" id="circuloMagia_6"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 85.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_7"
+						ng-style="magiaStyle_7" id="circuloMagia_7"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 89.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_8"
+						ng-style="magiaStyle_8" id="circuloMagia_8"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 92.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_9"
+						ng-style="magiaStyle_9" id="circuloMagia_9"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 95.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_10"
+						ng-style="magiaStyle_10" id="circuloMagia_10"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 99.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_11"
+						ng-style="magiaStyle_11" id="circuloMagia_11"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 102.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_12"
+						ng-style="magiaStyle_12" id="circuloMagia_12"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 79.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_13"
+						ng-style="magiaStyle_13" id="circuloMagia_13"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 82.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_14"
+						ng-style="magiaStyle_14" id="circuloMagia_14"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 85.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_15"
+						ng-style="magiaStyle_15" id="circuloMagia_15"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 89.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_16"
+						ng-style="magiaStyle_16" id="circuloMagia_16"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 92.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_17"
+						ng-style="magiaStyle_17" id="circuloMagia_17"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 95.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_18"
+						ng-style="magiaStyle_18" id="circuloMagia_18"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 99.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_19"
+						ng-style="magiaStyle_19" id="circuloMagia_19"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 102.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_20"
+						ng-style="magiaStyle_20" id="circuloMagia_20"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 79.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_21"
+						ng-style="magiaStyle_21" id="circuloMagia_21"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 82.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_22"
+						ng-style="magiaStyle_22" id="circuloMagia_22"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 85.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_23"
+						ng-style="magiaStyle_23" id="circuloMagia_23"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 89.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_24"
+						ng-style="magiaStyle_24" id="circuloMagia_24"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 92.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_25"
+						ng-style="magiaStyle_25" id="circuloMagia_25"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 95.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_26"
+						ng-style="magiaStyle_26" id="circuloMagia_26"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 99.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_27"
+						ng-style="magiaStyle_27" id="circuloMagia_27"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 102.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_28"
+						ng-style="magiaStyle_28" id="circuloMagia_28"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 79.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_29"
+						ng-style="magiaStyle_29" id="circuloMagia_29"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 82.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_30"
+						ng-style="magiaStyle_30" id="circuloMagia_30"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 85.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_31"
+						ng-style="magiaStyle_31" id="circuloMagia_31"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 89.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_32"
+						ng-style="magiaStyle_32" id="circuloMagia_32"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 92.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_33"
+						ng-style="magiaStyle_33" id="circuloMagia_33"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 95.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_34"
+						ng-style="magiaStyle_34" id="circuloMagia_34"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 99.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_35"
+						ng-style="magiaStyle_35" id="circuloMagia_35"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 102.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_36"
+						ng-style="magiaStyle_36" id="circuloMagia_36"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 79.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_37"
+						ng-style="magiaStyle_37" id="circuloMagia_37"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 82.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_38"
+						ng-style="magiaStyle_38" id="circuloMagia_38"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 85.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_39"
+						ng-style="magiaStyle_39" id="circuloMagia_39"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 89.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_40"
+						ng-style="magiaStyle_40" id="circuloMagia_40"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 92.4%"
+						readonly=""> <input type="text" ng-model="circuloMagia_41"
+						ng-style="magiaStyle_41" id="circuloMagia_41"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 95.8%"
+						readonly=""> <input type="text" ng-model="circuloMagia_42"
+						ng-style="magiaStyle_42" id="circuloMagia_42"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 99.1%"
+						readonly=""> <input type="text" ng-model="circuloMagia_43"
+						ng-style="magiaStyle_43" id="circuloMagia_43"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 102.4%"
+						readonly="">
+				</div>
+				<div id="vida">
+					<input type="text" ng-model="circuloVida_Muerto"
+						ng-style="vidaStyle_Muerto" id="circuloVida_Muerto"
+						style="border: none; height: 1.8%; width: 7.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 109.6%"
+						readonly=""> <input type="text" ng-model="circuloVida_m2"
+						ng-style="vidaStyle_m2" id="circuloVida_m2"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 117.2%"
+						readonly=""> <input type="text" ng-model="circuloVida_m1"
+						ng-style="vidaStyle_m1" id="circuloVida_m1"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 120.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_0"
+						ng-style="vidaStyle_0" id="circuloVida_0"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 123.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_1"
+						ng-style="vidaStyle_1" id="circuloVida_1"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 127.1%"
+						readonly=""> <input type="text" ng-model="circuloVida_2"
+						ng-style="vidaStyle_2" id="circuloVida_2"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 130.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_3"
+						ng-style="vidaStyle_3" id="circuloVida_3"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 18.55%; left: 133.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_4"
+						ng-style="vidaStyle_4" id="circuloVida_4"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 110.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_5"
+						ng-style="vidaStyle_5" id="circuloVida_5"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 113.75%"
+						readonly=""> <input type="text" ng-model="circuloVida_6"
+						ng-style="vidaStyle_6" id="circuloVida_6"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 117.2%"
+						readonly=""> <input type="text" ng-model="circuloVida_7"
+						ng-style="vidaStyle_7" id="circuloVida_7"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 120.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_8"
+						ng-style="vidaStyle_8" id="circuloVida_8"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 123.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_9"
+						ng-style="vidaStyle_9" id="circuloVida_9"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 127.1%"
+						readonly=""> <input type="text" ng-model="circuloVida_10"
+						ng-style="vidaStyle_10" id="circuloVida_10"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 130.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_11"
+						ng-style="vidaStyle_11" id="circuloVida_11"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 19.9%; left: 133.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_12"
+						ng-style="vidaStyle_12" id="circuloVida_12"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 110.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_13"
+						ng-style="vidaStyle_13" id="circuloVida_13"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 113.75%"
+						readonly=""> <input type="text" ng-model="circuloVida_14"
+						ng-style="vidaStyle_14" id="circuloVida_14"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 117.2%"
+						readonly=""> <input type="text" ng-model="circuloVida_15"
+						ng-style="vidaStyle_15" id="circuloVida_15"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 120.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_16"
+						ng-style="vidaStyle_16" id="circuloVida_16"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 123.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_17"
+						ng-style="vidaStyle_17" id="circuloVida_17"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 127.1%"
+						readonly=""> <input type="text" ng-model="circuloVida_18"
+						ng-style="vidaStyle_18" id="circuloVida_18"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 130.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_19"
+						ng-style="vidaStyle_19" id="circuloVida_19"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 21.5%; left: 133.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_20"
+						ng-style="vidaStyle_20" id="circuloVida_20"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 110.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_21"
+						ng-style="vidaStyle_21" id="circuloVida_21"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 113.75%"
+						readonly=""> <input type="text" ng-model="circuloVida_22"
+						ng-style="vidaStyle_22" id="circuloVida_22"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 117.2%"
+						readonly=""> <input type="text" ng-model="circuloVida_23"
+						ng-style="vidaStyle_23" id="circuloVida_23"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 120.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_24"
+						ng-style="vidaStyle_24" id="circuloVida_24"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 123.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_25"
+						ng-style="vidaStyle_25" id="circuloVida_25"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 127.1%"
+						readonly=""> <input type="text" ng-model="circuloVida_26"
+						ng-style="vidaStyle_26" id="circuloVida_26"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 130.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_27"
+						ng-style="vidaStyle_27" id="circuloVida_27"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 133.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_28"
+						ng-style="vidaStyle_28" id="circuloVida_28"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 110.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_29"
+						ng-style="vidaStyle_29" id="circuloVida_29"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 113.75%"
+						readonly=""> <input type="text" ng-model="circuloVida_30"
+						ng-style="vidaStyle_30" id="circuloVida_30"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 117.2%"
+						readonly=""> <input type="text" ng-model="circuloVida_31"
+						ng-style="vidaStyle_31" id="circuloVida_31"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 120.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_32"
+						ng-style="vidaStyle_32" id="circuloVida_32"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 123.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_33"
+						ng-style="vidaStyle_33" id="circuloVida_33"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 127.1%"
+						readonly=""> <input type="text" ng-model="circuloVida_34"
+						ng-style="vidaStyle_34" id="circuloVida_34"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 130.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_35"
+						ng-style="vidaStyle_35" id="circuloVida_35"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 24.4%; left: 133.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_36"
+						ng-style="vidaStyle_36" id="circuloVida_36"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 110.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_37"
+						ng-style="vidaStyle_37" id="circuloVida_37"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 113.75%"
+						readonly=""> <input type="text" ng-model="circuloVida_38"
+						ng-style="vidaStyle_38" id="circuloVida_38"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 117.2%"
+						readonly=""> <input type="text" ng-model="circuloVida_39"
+						ng-style="vidaStyle_39" id="circuloVida_39"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 120.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_40"
+						ng-style="vidaStyle_40" id="circuloVida_40"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 123.8%"
+						readonly=""> <input type="text" ng-model="circuloVida_41"
+						ng-style="vidaStyle_41" id="circuloVida_41"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 127.1%"
+						readonly=""> <input type="text" ng-model="circuloVida_42"
+						ng-style="vidaStyle_42" id="circuloVida_42"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 130.5%"
+						readonly=""> <input type="text" ng-model="circuloVida_43"
+						ng-style="vidaStyle_43" id="circuloVida_43"
+						style="border: none; height: 1.8%; width: 2.8%; border-radius: 50%; background: none; position: absolute; top: 25.85%; left: 133.8%"
+						readonly="">
+				</div>
+			</div>
+
+			<!-- Definimos un contador para todas las habilidades - Hacemos que sólo estén habilitados una vez que se ha elegido la profesión -->
+			<div id="habilidades">
+				<p id="restantes"
+					style="position: absolute; top: 33.5%; left: 103%; width: 30%; display: none">Le
+					quedan {{totalHabilidades}} puntos por asignar.</p>
+
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Antropologia" id="Antropologia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 33.5%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Arqueologia" id="Arqueologia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 35.2%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="ArtesMarciales" id="ArtesMarciales"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 36.85%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Astronomia" id="Astronomia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 38.45%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Biologia" id="Biologia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 40.1%; left: 51.2%">
+				<input type="number" min="25" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="BuscarLibros" id="BuscarLibros"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 41.8%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Cerrajeria" id="Cerrajeria"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 43.4%; left: 51.2%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Charlataneria" id="Charlataneria"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 45.05%; left: 51.2%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="CienciasOcultas" id="CienciasOcultas"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 46.7%; left: 51.2%">
+				<input type="number" min="20" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="ConducirAutomovil" id="ConducirAutomovil"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 48.4%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="ConducirMaquinaria" id="ConducirMaquinaria"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 50.05%; left: 51.2%">
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Contabilidad" id="Contabilidad"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 51.7%; left: 51.2%">
+				<input type="number" min="15" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Credito" id="Credito"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 53.4%; left: 51.2%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Derecho" id="Derecho"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 55%; left: 51.2%">
+				<input type="number" min="25" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Descubrir" id="Descubrir"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 56.7%; left: 51.2%">
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Discrecion" id="Discrecion"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 58.3%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Disfrazarse" id="Disfrazarse"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 60%; left: 51.2%">
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Electricidad" id="Electricidad"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 61.65%; left: 51.2%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Equitacion" id="Equitacion"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 63.3%; left: 51.2%">
+				<input type="number" min="25" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Escuchar" id="Escuchar"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 65%; left: 51.2%">
+				<input type="number" min="{{des*2}}" max="99"
+					ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Esquivar" id="Esquivar"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 66.65%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Farmacologia" id="Farmacologia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 68.3%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Fisica" id="Fisica"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 70%; left: 51.2%">
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Fotografia" id="Fotografia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 71.65%; left: 51.2%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Geologia" id="Geologia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 73.25%; left: 51.2%">
+				<input type="text" ng-model="textoHabilidadArtesanal_1"
+					id="textoHabilidadArtesanal_1"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 76.7%; left: 21.5%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="HabilidadArtesanal_1" id="HabilidadArtesanal_1"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 76.7%; left: 51.2%">
+				<input type="text" ng-model="textoHabilidadArtesanal_2"
+					id="textoHabilidadArtesanal_2"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 78.4%; left: 21.5%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="HabilidadArtesanal_2" id="HabilidadArtesanal_2"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 78.4%; left: 51.2%">
+
+				<input type="text" ng-model="textoHabilidadArtistica_1"
+					id="textoHabilidadArtistica_1"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 35.2%; left: 61.9%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="HabilidadArtistica_1" id="HabilidadArtistica_1"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 35.2%; width: 7%; left: 91.3%">
+				<input type="text" ng-model="textoHabilidadArtistica_2"
+					id="textoHabilidadArtistica_2"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 36.85%; left: 61.9%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="HabilidadArtistica_2" id="HabilidadArtistica_2"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 36.85%; width: 7%; left: 91.3%">
+				<input type="number" min="20" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Historia" id="Historia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 38.45%; width: 7%; left: 91.3%">
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="HistoriaNatural" id="HistoriaNatural"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 40.1%; width: 7%; left: 91.3%">
+				<input type="number" min="25" max="99"
+					ng-change="calcularTotal(); calcularArmaLanzar()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Lanzar" id="Lanzar"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 41.8%; width: 7%; left: 91.3%">
+				<input type="text" id="textoLenguaPropia"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 45.05%; left: 61.9%">
+				<input type="number" min="{{edu*5}}" max="99"
+					ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="LenguaPropia" id="LenguaPropia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 45.05%; width: 7%; left: 91.3%">
+				<input type="number" min="20" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Mecanica" id="Mecanica"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 46.7%; width: 7%; left: 91.3%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Medicina" id="Medicina"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 48.4%; width: 7%; left: 91.3%">
+				<input type="number" min="0" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="MitosdeCthulhu" id="MitosdeCthulhu"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 50.05%; width: 7%; left: 91.3%">
+				<input type="number" min="25" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Nadar" id="Nadar"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 51.7%; width: 7%; left: 91.3%">
+				<input type="number" min="15" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Ocultar" id="Ocultar"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 53.4%; width: 7%; left: 91.3%">
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Ocultarse" id="Ocultarse"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 55%; width: 7%; left: 91.3%">
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Orientarse" id="Orientarse"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 56.7%; width: 7%; left: 91.3%">
+				<input type="text" ng-model="textoOtrasLenguas_1"
+					id="textoOtrasLenguas_1"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 60%; left: 61.9%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="OtrasLenguas_1" id="OtrasLenguas_1"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 60%; width: 7%; left: 91.3%">
+				<input type="text" ng-model="textoOtrasLenguas_2"
+					id="textoOtrasLenguas_2"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 61.65%; left: 61.9%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="OtrasLenguas_2" id="OtrasLenguas_2"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 61.65%; width: 7%; left: 91.3%">
+				<input type="text" ng-model="textoOtrasLenguas_3"
+					id="textoOtrasLenguas_3"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 63.3%; left: 61.9%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="OtrasLenguas_3" id="OtrasLenguas_3"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 63.3%; width: 7%; left: 91.3%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Persuasion" id="Persuasion"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 65%; width: 7%; left: 91.3%">
+				<input type="text" ng-model="textoPilotar_1" id="textoPilotar_1"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 68.3%; left: 61.9%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Pilotar_1" id="Pilotar_1"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 68.3%; width: 7%; left: 91.3%">
+				<input type="text" ng-model="textoPilotar_2" id="textoPilotar_2"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 70%; left: 61.9%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Pilotar_2" id="Pilotar_2"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 70%; width: 7%; left: 91.3%">
+				<input type="number" min="30" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="PrimerosAuxilios" id="PrimerosAuxilios"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 71.65%; width: 7%; left: 91.3%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Psicoanalisis" id="Psicoanalisis"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 73.25%; width: 7%; left: 91.3%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Psicologia" id="Psicologia"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 74.9%; width: 7%; left: 91.3%">
+				<input type="number" min="1" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Quimica" id="Quimica"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 76.7%; width: 7%; left: 91.3%">
+				<input type="number" min="5" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Regatear" id="Regatear"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 78.4%; width: 7%; left: 91.3%">
+
+				<input type="number" min="25" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Saltar" id="Saltar"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 55%; left: 130.4%">
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="SeguirRastros" id="SeguirRastros"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 56.7%; left: 130.4%">
+				<input type="number" min="40" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Trepar" id="Trepar"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 58.3%; left: 130.4%">
+				<input type="text" id="textoOtra_1"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 60%; left: 101.9%">
+				<input type="number" min="0" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Otra_1" id="Otra_1"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 60%; left: 130.4%">
+				<input type="text" id="textoOtra_2"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 61.65%; left: 101.9%">
+				<input type="number" min="0" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Otra_2" id="Otra_2"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 61.65%; left: 130.4%">
+				<input type="text" id="textoOtra_3"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 63.3%; left: 101.9%">
+				<input type="number" min="0" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Otra_3" id="Otra_3"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 63.3%; left: 130.4%">
+				<input type="text" id="textoOtra_4"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 65%; left: 101.9%">
+				<input type="number" min="0" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Otra_4" id="Otra_4"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 65%; left: 130.4%">
+				<input type="text" id="textoOtra_5"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 66.65%; left: 101.9%">
+				<input type="number" min="0" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Otra_5" id="Otra_5"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 66.65%; left: 130.4%">
+				<input type="text" id="textoOtra_6"
+					style="height: 1.5%; width: 26%; background: none; position: absolute; top: 68.3%; left: 101.9%">
+				<input type="number" min="0" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Otra_6" id="Otra_6"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 68.3%; left: 130.4%">
+
+				<input type="number" min="15" max="99"
+					ng-change="calcularTotal(); calcularArmas()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Ametralladora" id="Ametralladora"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 71.65%; left: 130.4%">
+				<input type="number" min="20" max="99"
+					ng-change="calcularTotal(); calcularArmas()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="ArmaCorta" id="ArmaCorta"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 73.25%; left: 130.4%">
+				<input type="number" min="30" max="99"
+					ng-change="calcularTotal(); calcularArmas()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Escopeta" id="Escopeta"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 74.9%; left: 130.4%">
+				<input type="number" min="25" max="99"
+					ng-change="calcularTotal(); calcularArmas()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Fusil" id="Fusil"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 76.7%; left: 130.4%">
+				<input type="number" min="15" max="99"
+					ng-change="calcularTotal(); calcularArmas()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Subfusil" id="Subfusil"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 78.4%; left: 130.4%">
+
+				<input type="number" min="10" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Cabezazo" id="Cabezazo"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 87.9%; left: 25%">
+				<input type="number" min="25" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Patada" id="Patada"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 89.55%; left: 25%">
+				<input type="number" min="25" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null"
+					ng-model="Presa" id="Presa"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 91.2%; left: 25%">
+				<input type="number" min="25" max="99" ng-change="calcularTotal()"
+					ng-disabled="totalHabilidades==0 || totalHabilidades==null || totalHabilidades==null"
+					ng-model="Punetazo" id="Punetazo"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 92.9%; left: 25%">
+			</div>
+
+			<!-- Sección con las armas - Se rellenan gracias a Oracle -->
+			<div id="armasCC">
+				<select id="ArmaCC_1" ng-model="ArmaCC_1"
+					ng-disabled="totalHabilidades==null" ng-change="calcularArma(1)"
+					ng-options="option.name as option.value for option in armasCCList"
+					style="background: none; width: 17%; position: absolute; top: 94.5%; left: 7.5%"></select>
+				<select id="ArmaCC_2" ng-model="ArmaCC_2"
+					ng-disabled="totalHabilidades==null" ng-change="calcularArma(2)"
+					ng-options="option.name as option.value for option in armasCCList"
+					style="background: none; width: 17%; position: absolute; top: 96.1%; left: 7.5%"></select>
+
+				<input type="number" ng-model="ArmaCCHabilidad_1"
+					id="ArmaCCHabilidad_1"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 94.5%; left: 25%"
+					readonly=""> <input type="number"
+					ng-model="ArmaCCHabilidad_2" id="ArmaCCHabilidad_2"
+					style="text-align: center; background: none; height: 1.5%; width: 7%; position: absolute; top: 96.1%; left: 25%"
+					readonly=""> <input type="text" ng-model="ArmaCCDano_1"
+					id="ArmaCCDano_1"
+					style="text-align: center; background: none; height: 1.5%; width: 8.5%; position: absolute; top: 94.5%; left: 32.5%"
+					readonly=""> <input type="text" ng-model="ArmaCCDano_2"
+					id="ArmaCCDano_2"
+					style="text-align: center; background: none; height: 1.5%; width: 8.5%; position: absolute; top: 96.1%; left: 32.5%"
+					readonly=""> <input type="text" ng-model="ArmaCCManos_1"
+					id="ArmaCCManos_1"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 94.5%; left: 41.5%"
+					readonly=""> <input type="text" ng-model="ArmaCCManos_2"
+					id="ArmaCCManos_2"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 96.1%; left: 41.5%"
+					readonly=""> <input type="text" ng-model="ArmaCCAlcance_1"
+					id="ArmaCCAlcance_1"
+					style="text-align: center; background: none; height: 1.5%; width: 8.5%; position: absolute; top: 94.5%; left: 47%"
+					readonly=""> <input type="text" ng-model="ArmaCCAlcance_2"
+					id="ArmaCCAlcance_2"
+					style="text-align: center; background: none; height: 1.5%; width: 8.5%; position: absolute; top: 96.1%; left: 47%"
+					readonly=""> <input type="text" ng-model="ArmaCCAtaques_1"
+					id="ArmaCCAtaques_1"
+					style="text-align: center; background: none; height: 1.5%; width: 3%; position: absolute; top: 94.5%; left: 56%"
+					readonly=""> <input type="text" ng-model="ArmaCCAtaques_2"
+					id="ArmaCCAtaques_2"
+					style="text-align: center; background: none; height: 1.5%; width: 3%; position: absolute; top: 96.1%; left: 56%"
+					readonly=""> <input type="text" ng-model="ArmaCCPR_1"
+					id="ArmaCCPR_1"
+					style="text-align: center; background: none; height: 1.5%; width: 6.5%; position: absolute; top: 94.5%; left: 59.5%"
+					readonly=""> <input type="text" ng-model="ArmaCCPR_2"
+					id="ArmaCCPR_2"
+					style="text-align: center; background: none; height: 1.5%; width: 6.5%; position: absolute; top: 96.1%; left: 59.5%"
+					readonly="">
+			</div>
+
+			<!-- Sección con las armas a distancia - Se rellenan gracias a Oracle -->
+			<div id="ArmasDistancia">
+				<select id="ArmaDistancia_1" ng-model="ArmaDistancia_1"
+					ng-change="calcularArmaDistancia(1)"
+					ng-options="option.name as option.value for option in armasDistanciaList"
+					style="background: none; width: 16%; position: absolute; top: 87.9%; left: 75.5%"></select>
+				<select id="ArmaDistancia_2" ng-model="ArmaDistancia_2"
+					ng-disabled="totalHabilidades==null"
+					ng-change="calcularArmaDistancia(2)"
+					ng-options="option.name as option.value for option in armasDistanciaList"
+					style="background: none; width: 16%; position: absolute; top: 89.55%; left: 75.5%"></select>
+				<select id="ArmaDistancia_3" ng-model="ArmaDistancia_3"
+					ng-disabled="totalHabilidades==null"
+					ng-change="calcularArmaDistancia(3)"
+					ng-options="option.name as option.value for option in armasDistanciaList"
+					style="background: none; width: 16%; position: absolute; top: 91.2%; left: 75.5%"></select>
+				<select id="ArmaDistancia_4" ng-model="ArmaDistancia_4"
+					ng-disabled="totalHabilidades==null"
+					ng-change="calcularArmaDistancia(4)"
+					ng-options="option.name as option.value for option in armasDistanciaList"
+					style="background: none; width: 16%; position: absolute; top: 92.9%; left: 75.5%"></select>
+				<select id="ArmaDistancia_5" ng-model="ArmaDistancia_5"
+					ng-disabled="totalHabilidades==null"
+					ng-change="calcularArmaDistancia(5)"
+					ng-options="option.name as option.value for option in armasDistanciaList"
+					style="background: none; width: 16%; position: absolute; top: 94.5%; left: 75.5%"></select>
+				<select id="ArmaDistancia_6" ng-model="ArmaDistancia_6"
+					ng-disabled="totalHabilidades==null"
+					ng-change="calcularArmaDistancia(6)"
+					ng-options="option.name as option.value for option in armasDistanciaList"
+					style="background: none; width: 16%; position: absolute; top: 96.1%; left: 75.5%"></select>
+
+				<input type="number" ng-model="ArmaDistanciaHabilidad_1"
+					id="ArmaDistanciaHabilidad_1"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 87.9%; left: 92%"
+					readonly=""> <input type="number"
+					ng-model="ArmaDistanciaHabilidad_2" id="ArmaDistanciaHabilidad_2"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 89.55%; left: 92%"
+					readonly=""> <input type="number"
+					ng-model="ArmaDistanciaHabilidad_3" id="ArmaDistanciaHabilidad_3"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 91.2%; left: 92%"
+					readonly=""> <input type="number"
+					ng-model="ArmaDistanciaHabilidad_4" id="ArmaDistanciaHabilidad_4"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 92.9%; left: 92%"
+					readonly=""> <input type="number"
+					ng-model="ArmaDistanciaHabilidad_5" id="ArmaDistanciaHabilidad_5"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 94.5%; left: 92%"
+					readonly=""> <input type="number"
+					ng-model="ArmaDistanciaHabilidad_6" id="ArmaDistanciaHabilidad_6"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 96.1%; left: 92%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaDano_1" id="ArmaDistanciaDano_1"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 87.9%; left: 97.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaDano_2" id="ArmaDistanciaDano_2"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 89.55%; left: 97.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaDano_3" id="ArmaDistanciaDano_3"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 91.2%; left: 97.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaDano_4" id="ArmaDistanciaDano_4"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 92.9%; left: 97.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaDano_5" id="ArmaDistanciaDano_5"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 94.5%; left: 97.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaDano_6" id="ArmaDistanciaDano_6"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 96.1%; left: 97.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaFdefect_1" id="ArmaDistanciaFdefect_1"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 87.9%; left: 106%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaFdefect_2" id="ArmaDistanciaFdefect_2"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 89.55%; left: 106%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaFdefect_3" id="ArmaDistanciaFdefect_3"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 91.2%; left: 106%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaFdefect_4" id="ArmaDistanciaFdefect_4"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 92.9%; left: 106%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaFdefect_5" id="ArmaDistanciaFdefect_5"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 94.5%; left: 106%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaFdefect_6" id="ArmaDistanciaFdefect_6"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 96.1%; left: 106%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAlcance_1" id="ArmaDistanciaAlcance_1"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 87.9%; left: 112.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAlcance_2" id="ArmaDistanciaAlcance_2"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 89.55%; left: 112.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAlcance_3" id="ArmaDistanciaAlcance_3"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 91.2%; left: 112.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAlcance_4" id="ArmaDistanciaAlcance_4"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 92.9%; left: 112.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAlcance_5" id="ArmaDistanciaAlcance_5"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 94.5%; left: 112.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAlcance_6" id="ArmaDistanciaAlcance_6"
+					style="text-align: center; background: none; height: 1.5%; width: 6%; position: absolute; top: 96.1%; left: 112.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAtaques_1" id="ArmaDistanciaAtaques_1"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 87.9%; left: 119%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAtaques_2" id="ArmaDistanciaAtaques_2"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 89.55%; left: 119%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAtaques_3" id="ArmaDistanciaAtaques_3"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 91.2%; left: 119%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAtaques_4" id="ArmaDistanciaAtaques_4"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 92.9%; left: 119%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAtaques_5" id="ArmaDistanciaAtaques_5"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 94.5%; left: 119%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaAtaques_6" id="ArmaDistanciaAtaques_6"
+					style="text-align: center; background: none; height: 1.5%; width: 5%; position: absolute; top: 96.1%; left: 119%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaCapacidad_1" id="ArmaDistanciaCapacidad_1"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 87.9%; left: 124.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaCapacidad_2" id="ArmaDistanciaCapacidad_2"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 89.55%; left: 124.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaCapacidad_3" id="ArmaDistanciaCapacidad_3"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 91.2%; left: 124.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaCapacidad_4" id="ArmaDistanciaCapacidad_4"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 92.9%; left: 124.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaCapacidad_5" id="ArmaDistanciaCapacidad_5"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 94.5%; left: 124.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaCapacidad_6" id="ArmaDistanciaCapacidad_6"
+					style="text-align: center; background: none; height: 1.5%; width: 8%; position: absolute; top: 96.1%; left: 124.5%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaPR_1" id="ArmaDistanciaPR_1"
+					style="text-align: center; background: none; height: 1.5%; width: 3%; position: absolute; top: 87.9%; left: 133%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaPR_2" id="ArmaDistanciaPR_2"
+					style="text-align: center; background: none; height: 1.5%; width: 3%; position: absolute; top: 89.55%; left: 133%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaPR_3" id="ArmaDistanciaPR_3"
+					style="text-align: center; background: none; height: 1.5%; width: 3%; position: absolute; top: 91.2%; left: 133%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaPR_4" id="ArmaDistanciaPR_4"
+					style="text-align: center; background: none; height: 1.5%; width: 3%; position: absolute; top: 92.9%; left: 133%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaPR_5" id="ArmaDistanciaPR_5"
+					style="text-align: center; background: none; height: 1.5%; width: 3%; position: absolute; top: 94.5%; left: 133%"
+					readonly=""> <input type="text"
+					ng-model="ArmaDistanciaPR_6" id="ArmaDistanciaPR_6"
+					style="text-align: center; background: none; height: 1.5%; width: 3%; position: absolute; top: 96.1%; left: 133%"
+					readonly="">
+			</div>
+		</div>
+
+		<!-- Botón que activa el modal de instrucciones -->
+		<button type="button" id="botonInstrucciones" class="btn-lg"
+			data-toggle="modal" data-target="#instrucciones"
+			style="position: absolute; top: 17%; left: 20%; z-index: 1">
+			<span class="glyphicon glyphicon-book"></span>
+		</button>
+		<!-- Calcula todos los datos en función de la profesión y las características escogidas -->
+		<button type="button" id="calculoFicha" class="btn-lg"
+			ng-click="calcularFicha()"
+			style="position: absolute; top: 25%; left: 20%; z-index: 1">
+			<span class="glyphicon glyphicon-play-circle"></span>
+		</button>
+		<!-- Se incluye botón para asignar valores aleatorios a las características -->
+		<button type="button" id="valoresAleatorios" class="btn-lg"
+			ng-click="valoresAleatorios()"
+			style="position: absolute; top: 19%; right: 15%; z-index: 1">
+			<span class="glyphicon glyphicon-random"></span>
+		</button>
+		<!-- Links ocultos usados para activar los distintos modales -->
+		<a id="restarLink" data-toggle="modal" data-target="#restar"
+			style="display: none"></a> <a id="sumarLink" data-toggle="modal"
+			data-target="#sumar" style="display: none"></a>
+	</div>
+
+	<footer class="footer">
+		<div align="center" class="container"
+			style="width: auto; padding: 0 15px;">
+			<p class="text-muted" style="margin: 20px 0;">Copyright (c) Jorge
+				López Yagüe 2016</p>
+		</div>
+	</footer>
+</body>
+</html>

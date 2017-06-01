@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html ng-app="descargasApp">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Descargas</title>
+
+<!-- CSS de Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+<!-- Scripts de jQuery y Bootstrap -->
+<script src="js/angular.js"></script>
+<script src="js/jquery-1.12.3.min.js"></script>
+<script src="js/jquery.validate.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/application/descargas.js"></script>
+</head>
+
+<body ng-controller="descargasAppCtrl" id="descargasAppCtrl">
+	<!-- Menú de navegación -->
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="home.html">Rol Generator</a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li class="dropdown"><a href="#" class="dropdown-toggle"
+						data-toggle="dropdown" role="button" aria-haspopup="true"
+						aria-expanded="false">Juegos<span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href="l5a.html">La leyenda de los cinco anillos</a></li>
+							<li><a href="cthulhu.html">La llamada de Cthulhu</a></li>
+						</ul></li>
+					<li><a href="shop.html">Enlaces de Compra</a></li>
+					<li><a href="contactUs.html">Contacto</a></li>
+					<li><a href="actualizaciones.html">Próximas
+							actualizaciones</a></li>
+					<li class="active"><a href="descargas.html">Descargas</a></li>
+				</ul>
+				<div class="navbar-right navbar-text">
+					<a class="navbar-link" href="registration.html">Regístrate</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<!-- Contenedor  -->
+	<div class="container">
+		<div class="jumbotron">
+			<h1>Descargas</h1>
+
+			<ul class="list-group">
+				<li class="list-group-item"><h3>La leyenda de los cinco
+						anillos</h3>
+					<div class="row">
+						<div class="col-xs-3">
+							<div class="thumbnail">
+								<div class="caption">
+									<h4>Libro de reglas</h4>
+									<p>
+										<a ng-click="descargar(0)" class="btn btn-primary"
+											role="button">Visualizar</a>
+									</p>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-xs-3">
+							<div class="thumbnail">
+								<div class="caption">
+									<h4>Ficha de personaje</h4>
+									<p>
+										<a ng-click="descargar(1)" class="btn btn-primary"
+											role="button">Visualizar</a>
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-xs-3">
+							<div class="thumbnail">
+								<div class="caption">
+									<h4>Tierras sombrias</h4>
+									<p>
+										<a ng-click="descargar(2)" class="btn btn-primary"
+											role="button">Visualizar</a>
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-xs-3">
+							<div class="thumbnail">
+								<div class="caption">
+									<h4>Director de juego</h4>
+									<p>
+										<a ng-click="descargar(3)" class="btn btn-primary"
+											role="button">Visualizar</a>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div></li>
+
+				<li class="list-group-item"><h3>La llamada de Cthulhu</h3>
+					<div class="row">
+						<div class="col-xs-6">
+							<div class="thumbnail">
+								<div class="caption">
+									<h4>Libro de reglas</h4>
+									<p>
+										<a ng-click="descargar(4)" class="btn btn-primary"
+											role="button">Visualizar</a>
+									</p>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-xs-6">
+							<div class="thumbnail">
+								<div class="caption">
+									<h4>Ficha de personaje</h4>
+									<p>
+										<a ng-click="descargar(5)" class="btn btn-primary"
+											role="button">Visualizar</a>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div></li>
+			</ul>
+		</div>
+	</div>
+
+	<!-- Pie de página -->
+	<footer class="footer">
+		<div align="center" class="container"
+			style="width: auto; padding: 0 15px;">
+			<p class="text-muted" style="margin: 20px 0;">Copyright (c) Jorge
+				López Yagüe 2016</p>
+		</div>
+	</footer>
+</body>
+</html>

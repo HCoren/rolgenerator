@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html ng-app="l5aApp">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L5A - Creación de Personaje</title>
+
+<!-- CSS de Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+<!-- Scripts de angular, jQuery y Bootstrap -->
+<script src="js/angular.js">
+	
+</script>
+<script src="js/jquery-1.12.3.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<!-- Script propio de la página -->
+<script src="js/application/l5a.js">
+	
+</script>
+</head>
+
+<body ng-controller="l5aAppCtrl" ng-init="inicializar()">
+	<img src="images/application/l5a-right.png" align="right"></img>
+	<img src="images/application/l5a-left.jpg" align="left"></img>
+
+	<div class="container center-block">
+
+		<!-- Navegación -->
+		<nav class="navbar navbar-default navbar-fixed-top">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="home.html">Rol Generator</a>
+				</div>
+				<div id="navbar" class="navbar-collapse collapse">
+					<ul class="nav navbar-nav">
+						<li class="dropdown active"><a href="#"
+							class="dropdown-toggle" data-toggle="dropdown" role="button"
+							aria-haspopup="true" aria-expanded="false">Juegos<span
+								class="caret"></span></a>
+							<ul class="dropdown-menu" class="active">
+								<li><a href="l5a.html">La leyenda de los cinco anillos</a></li>
+								<li><a href="cthulhu.html">La llamada de Cthulhu</a></li>
+							</ul></li>
+						<li><a href="shop.html">Enlaces de Compra</a></li>
+						<li><a href="contactUs.html">Contacto</a></li>
+						<li><a href="actualizaciones.html">Próximas
+								actualizaciones</a></li>
+						<li><a href="descargas.html">Descargas</a></li>
+					</ul>
+					<div class="navbar-right navbar-text">
+						<a class="navbar-link" href="registration.html">Regístrate</a>
+					</div>
+					</ul>
+				</div>
+			</div>
+		</nav>
+
+		<!-- Modal que contiene las instrucciones de uso -->
+		<div class="modal fade" id="instrucciones" tabindex="-1" role="dialog"
+			aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">
+							<span class="glyphicon glyphicon-remove" style="color: #FFF;"></span>
+						</button>
+						<h4 class="modal-title">INSTRUCCIONES</h4>
+					</div>
+					<div class="modal-body">
+						<p>
+							1. Elija un nombre y un clan. <br /> <br /> 2. Seleccione una
+							familia y una escuela. <br /> <br /> 3. Haga click en el botón
+							de 'Play'. <br /> <br /> 4. Realice algunos ajustes manuales
+							hasta finalizar el personaje (habilidades, armas, armadura...). <br />
+							<br /> 5. En caso de que lo desee puede almacenar el personaje
+							creado haciendo click en el botón "¿?" o recuperar uno guardado
+							con el botón "¿?". (en desarrollo) <br /> <br /> 6. Para
+							generar un nuevo personaje pulse el botón "Reiniciar".
+						</p>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">Close</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Contenedor con la ficha del personaje -->
+		<div id="ficha" style="position: absolute; top: 10%; margin: 5%">
+			<!-- Usamos la imagen como plantilla para colocar todos los elementos -->
+			<img src="images/application/l5a.png" align="center"
+				style="z-index: 3"></img>
+
+			<!-- Datos del personaje - Se calculan dinámicamente con Oracle y angular -->
+			<div id="datosPersonaje">
+				<select id="familia" ng-model="familia"
+					ng-options="option.name as option.value for option in familiasList"
+					style="background: none; height: 2%; width: 9.5%; position: absolute; top: 3.5%; left: 12%"></select>
+				<input type="text" id="nombre" size="10%" placeholder="Nombre"
+					style="background: none; position: absolute; height: 2%; top: 3.5%; left: 22%">
+				<select id="clan" ng-model="clan"
+					ng-options="option.name as option.value for option in clanesList"
+					ng-change="llenarFamilias(); llenarEscuelas();"
+					style="background: none; width: 22.6%; position: absolute; top: 5.8%; left: 12%"></select>
+				<select id="escuela" ng-model="escuela"
+					ng-options="option.name as option.value for option in escuelasList"
+					style="background: none; width: 22.6%; position: absolute; top: 8%; left: 12%"></select>
+
+				<input type="text" value="{{rango}}" id="rango" size="10%"
+					style="text-align: center; background: none; position: absolute; height: 2%; top: 3.5%; left: 54%"
+					readonly=""> <input type="text" value="{{experiencia}}"
+					id="experiencia" size="10%" placeholder="Experiencia"
+					style="text-align: center; background: none; position: absolute; height: 2%; top: 5.7%; left: 54%">
+				<input type="text" id="reconocimiento" value="{{reconocimiento}}"
+					size="10%"
+					style="text-align: center; background: none; position: absolute; height: 2%; top: 7.8%; left: 54%"
+					readonly="">
+			</div>
+
+			<!-- Características del personaje - Se calculan dinámicamente con Oracle y angular -->
+			<div id="circulos" ng-click="calcularCirculos()">
+				<div id="circuloTierra">
+					<input type="text" id="tierra" value="{{tierra}}"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 20.5%; left: 32.5%"
+						readonly=""> <input type="number" max="10" min="1"
+						ng-model="resistencia" id="resistencia"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 15.7%; left: 23%">
+					<input type="number" max="10" min="1" ng-model="voluntad"
+						id="voluntad"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 18.9%; left: 21.5%">
+				</div>
+				<div id="circuloAire">
+					<input type="text" value="{{aire}}" id="aire"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 20.5%; left: 36.7%"
+						readonly=""> <input type="number" max="10" min="1"
+						ng-model="reflejos" id="reflejos"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 15.7%; left: 47.9%">
+					<input type="number" max="10" min="1" ng-model="consciencia"
+						id="consciencia"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 18.8%; left: 49.3%">
+				</div>
+				<div id="circuloAgua">
+					<input type="text" value="{{agua}}" id="agua"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 23.6%; left: 31.1%"
+						readonly=""> <input type="number" max="10" min="1"
+						ng-model="fuerza" id="fuerza"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 22.9%; left: 19.7%">
+					<input type="number" max="10" min="1" ng-model="percepcion"
+						id="percepcion"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 26.1%; left: 18.4%">
+				</div>
+				<div id="circuloFuego">
+					<input type="text" value="{{fuego}}" id="fuego"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 23.5%; left: 37.9%"
+						readonly=""> <input type="number" max="10" min="1"
+						ng-model="agilidad" id="agilidad"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 23%; left: 51%">
+					<input type="number" max="10" min="1" ng-model="inteligencia"
+						id="inteligencia"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 26%; left: 52.5%">
+				</div>
+				<div id="circuloVacio">
+					<input type="number" max="10" min="1" ng-model="vacio" id="vacio"
+						style="border: none; text-align: center; height: 2.4%; width: 3%; border-radius: 50%; background: none; position: absolute; top: 25.6%; left: 35.4%">
+
+					<input type="text" ng-model="circuloVacio_1"
+						ng-style="vacioStyle_1" id="circuloVacio_1"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 25.7%"
+						readonly=""> <input type="text" ng-model="circuloVacio_2"
+						ng-style="vacioStyle_2" id="circuloVacio_2"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 28.05%"
+						readonly=""> <input type="text" ng-model="circuloVacio_3"
+						ng-style="vacioStyle_3" id="circuloVacio_3"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 30.4%"
+						readonly=""> <input type="text" ng-model="circuloVacio_4"
+						ng-style="vacioStyle_4" id="circuloVacio_4"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 32.7%"
+						readonly=""> <input type="text" ng-model="circuloVacio_5"
+						ng-style="vacioStyle_5" id="circuloVacio_5"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 35%"
+						readonly=""> <input type="text" ng-model="circuloVacio_6"
+						ng-style="vacioStyle_6" id="circuloVacio_6"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 37.25%"
+						readonly=""> <input type="text" ng-model="circuloVacio_7"
+						ng-style="vacioStyle_7" id="circuloVacio_7"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 39.5%"
+						readonly=""> <input type="text" ng-model="circuloVacio_8"
+						ng-style="vacioStyle_8" id="circuloVacio_8"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 41.85%"
+						readonly=""> <input type="text" ng-model="circuloVacio_9"
+						ng-style="vacioStyle_9" id="circuloVacio_9"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 37.2%; left: 44.15%"
+						readonly="">
+				</div>
+			</div>
+
+			<!-- Características sociales del personaje - Se muestran como una serie de círculos que se pintan automáticamente -->
+			<div id="seccionSociedad">
+				<div id="honor">
+					<input type="number" max="10" min="0" ng-model="rangoHonor"
+						ng-change="calcularHonor()" id="rangoHonor"
+						style="font-weight: bold; text-align: center; background: #B8B8B8; height: 1.7%; width: 5%; position: absolute; top: 17.1%; left: 95%"
+						step="0.1"> <input type="text" ng-model="circuloHonor_1"
+						ng-style="honorStyle_1" id="circuloHonor_1"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 69.9%"
+						readonly=""> <input type="text" ng-model="circuloHonor_2"
+						ng-style="honorStyle_2" id="circuloHonor_2"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 72.25%"
+						readonly=""> <input type="text" ng-model="circuloHonor_3"
+						ng-style="honorStyle_3" id="circuloHonor_3"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 74.6%"
+						readonly=""> <input type="text" ng-model="circuloHonor_4"
+						ng-style="honorStyle_4" id="circuloHonor_4"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 76.95%"
+						readonly=""> <input type="text" ng-model="circuloHonor_5"
+						ng-style="honorStyle_5" id="circuloHonor_5"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 79.3%"
+						readonly=""> <input type="text" ng-model="circuloHonor_6"
+						ng-style="honorStyle_6" id="circuloHonor_6"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 81.55%"
+						readonly=""> <input type="text" ng-model="circuloHonor_7"
+						ng-style="honorStyle_7" id="circuloHonor_7"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 83.8%"
+						readonly=""> <input type="text" ng-model="circuloHonor_8"
+						ng-style="honorStyle_8" id="circuloHonor_8"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 86.1%"
+						readonly=""> <input type="text" ng-model="circuloHonor_9"
+						ng-style="honorStyle_9" id="circuloHonor_9"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 88.4%"
+						readonly=""> <input type="text" ng-model="circuloHonor_10"
+						ng-style="honorStyle_10" id="circuloHonor_10"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 19.1%; left: 90.7%"
+						readonly="">
+				</div>
+
+				<div id="gloria">
+					<input type="number" max="10" min="0" ng-model="rangoGloria"
+						ng-change="calcularGloria()" id="rangoGloria"
+						style="font-weight: bold; text-align: center; background: #B8B8B8; height: 1.7%; width: 5%; position: absolute; top: 21.7%; left: 95%"
+						step="0.1"> <input type="text" ng-model="circuloGloria_1"
+						ng-style="gloriaStyle_1" id="circuloGloria_1"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 69.9%"
+						readonly=""> <input type="text" ng-model="circuloGloria_2"
+						ng-style="gloriaStyle_2" id="circuloGloria_2"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 72.25%"
+						readonly=""> <input type="text" ng-model="circuloGloria_3"
+						ng-style="gloriaStyle_3" id="circuloGloria_3"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 74.6%"
+						readonly=""> <input type="text" ng-model="circuloGloria_4"
+						ng-style="gloriaStyle_4" id="circuloGloria_4"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 76.95%"
+						readonly=""> <input type="text" ng-model="circuloGloria_5"
+						ng-style="gloriaStyle_5" id="circuloGloria_5"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 79.3%"
+						readonly=""> <input type="text" ng-model="circuloGloria_6"
+						ng-style="gloriaStyle_6" id="circuloGloria_6"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 81.55%"
+						readonly=""> <input type="text" ng-model="circuloGloria_7"
+						ng-style="gloriaStyle_7" id="circuloGloria_7"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 83.8%"
+						readonly=""> <input type="text" ng-model="circuloGloria_8"
+						ng-style="gloriaStyle_8" id="circuloGloria_8"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 86.1%"
+						readonly=""> <input type="text" ng-model="circuloGloria_9"
+						ng-style="gloriaStyle_9" id="circuloGloria_9"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 88.4%"
+						readonly=""> <input type="text"
+						ng-model="circuloGloria_10" ng-style="gloriaStyle_10"
+						id="circuloGloria_10"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 23.7%; left: 90.7%"
+						readonly="">
+				</div>
+
+				<div id="status">
+					<input type="number" max="10" min="0" ng-model="rangoStatus"
+						ng-change="calcularStatus()" id="rangoStatus"
+						style="font-weight: bold; text-align: center; background: #B8B8B8; height: 1.7%; width: 5%; position: absolute; top: 26.5%; left: 95%"
+						step="0.1"> <input type="text" ng-model="circuloStatus_1"
+						ng-style="statusStyle_1" id="circuloStatus_1"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 69.9%"
+						readonly=""> <input type="text" ng-model="circuloStatus_2"
+						ng-style="statusStyle_2" id="circuloStatus_2"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 72.25%"
+						readonly=""> <input type="text" ng-model="circuloStatus_3"
+						ng-style="statusStyle_3" id="circuloStatus_3"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 74.6%"
+						readonly=""> <input type="text" ng-model="circuloStatus_4"
+						ng-style="statusStyle_4" id="circuloStatus_4"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 76.95%"
+						readonly=""> <input type="text" ng-model="circuloStatus_5"
+						ng-style="statusStyle_5" id="circuloStatus_5"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 79.3%"
+						readonly=""> <input type="text" ng-model="circuloStatus_6"
+						ng-style="statusStyle_6" id="circuloStatus_6"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 81.55%"
+						readonly=""> <input type="text" ng-model="circuloStatus_7"
+						ng-style="statusStyle_7" id="circuloStatus_7"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 83.8%"
+						readonly=""> <input type="text" ng-model="circuloStatus_8"
+						ng-style="statusStyle_8" id="circuloStatus_8"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 86.1%"
+						readonly=""> <input type="text" ng-model="circuloStatus_9"
+						ng-style="statusStyle_9" id="circuloStatus_9"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 88.4%"
+						readonly=""> <input type="text"
+						ng-model="circuloStatus_10" ng-style="statusStyle_10"
+						id="circuloStatus_10"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 28.5%; left: 90.7%"
+						readonly="">
+				</div>
+
+				<div id="mancha">
+					<input type="number" max="10" min="0" ng-model="rangoMancha"
+						ng-change="calcularMancha()" id="rangoMancha"
+						style="font-weight: bold; text-align: center; background: #B8B8B8; height: 1.7%; width: 5%; position: absolute; top: 31.3%; left: 95%"
+						step="0.1"> <input type="text" ng-model="circuloMancha_1"
+						ng-style="manchaStyle_1" id="circuloMancha_1"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 69.9%"
+						readonly=""> <input type="text" ng-model="circuloMancha_2"
+						ng-style="manchaStyle_2" id="circuloMancha_2"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 72.25%"
+						readonly=""> <input type="text" ng-model="circuloMancha_3"
+						ng-style="manchaStyle_3" id="circuloMancha_3"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 74.6%"
+						readonly=""> <input type="text" ng-model="circuloMancha_4"
+						ng-style="manchaStyle_4" id="circuloMancha_4"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 76.95%"
+						readonly=""> <input type="text" ng-model="circuloMancha_5"
+						ng-style="manchaStyle_5" id="circuloMancha_5"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 79.3%"
+						readonly=""> <input type="text" ng-model="circuloMancha_6"
+						ng-style="manchaStyle_6" id="circuloMancha_6"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 81.55%"
+						readonly=""> <input type="text" ng-model="circuloMancha_7"
+						ng-style="manchaStyle_7" id="circuloMancha_7"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 83.8%"
+						readonly=""> <input type="text" ng-model="circuloMancha_8"
+						ng-style="manchaStyle_8" id="circuloMancha_8"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 86.1%"
+						readonly=""> <input type="text" ng-model="circuloMancha_9"
+						ng-style="manchaStyle_9" id="circuloMancha_9"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 88.4%"
+						readonly=""> <input type="text"
+						ng-model="circuloMancha_10" ng-style="manchaStyle_10"
+						id="circuloMancha_10"
+						style="height: 1.6%; width: 1.9%; border-radius: 50%; background: none; position: absolute; top: 33.2%; left: 90.7%"
+						readonly="">
+				</div>
+			</div>
+
+			<!-- Definimos un contador para todas las habilidades - Hacemos que sólo estén habilitados una vez que se ha elegido el clan y la escuela -->
+			<div id="habilidades">
+				<input type="text" ng-model="circuloHabilidad_1"
+					ng-style="habilidadStyle_1" id="circuloHabilidad_1"
+					style="border: none; height: 1.3%; width: 1.5%; border-radius: 50%; background: none; position: absolute; top: 42.5%; left: 5.9%"
+					readonly=""> <input type="text"
+					ng-model="circuloHabilidad_2" ng-style="habilidadStyle_2"
+					id="circuloHabilidad_1"
+					style="border: none; height: 1.3%; width: 1.5%; border-radius: 50%; background: none; position: absolute; top: 44.15%; left: 5.9%"
+					readonly=""> <input type="text"
+					ng-model="circuloHabilidad_3" ng-style="habilidadStyle_3"
+					id="circuloHabilidad_1"
+					style="border: none; height: 1.3%; width: 1.5%; border-radius: 50%; background: none; position: absolute; top: 45.8%; left: 5.9%"
+					readonly=""> <input type="text"
+					ng-model="circuloHabilidad_4" ng-style="habilidadStyle_4"
+					id="circuloHabilidad_1"
+					style="border: none; height: 1.3%; width: 1.5%; border-radius: 50%; background: none; position: absolute; top: 47.45%; left: 5.9%"
+					readonly=""> <input type="text"
+					ng-model="circuloHabilidad_5" ng-style="habilidadStyle_5"
+					id="circuloHabilidad_1"
+					style="border: none; height: 1.3%; width: 1.5%; border-radius: 50%; background: none; position: absolute; top: 49.1%; left: 5.9%"
+					readonly=""> <input type="text"
+					ng-model="circuloHabilidad_6" ng-style="habilidadStyle_6"
+					id="circuloHabilidad_1"
+					style="border: none; height: 1.3%; width: 1.5%; border-radius: 50%; background: none; position: absolute; top: 50.75%; left: 5.9%"
+					readonly=""> <input type="text"
+					ng-model="circuloHabilidad_7" ng-style="habilidadStyle_7"
+					id="circuloHabilidad_1"
+					style="border: none; height: 1.3%; width: 1.5%; border-radius: 50%; background: none; position: absolute; top: 52.4%; left: 5.9%"
+					readonly=""> <select ng-model="habilidad_1"
+					ng-disabled="habilidad_1 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(1, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_1"
+					id="habilidad_1"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 42.2%; left: 9%"></select>
+				<select ng-model="habilidad_2"
+					ng-disabled="habilidad_2 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(2, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_2"
+					id="habilidad_2"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 43.8%; left: 9%"></select>
+				<select ng-model="habilidad_3"
+					ng-disabled="habilidad_3 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(3, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_3"
+					id="habilidad_3"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 45.5%; left: 9%"></select>
+				<select ng-model="habilidad_4"
+					ng-disabled="habilidad_4 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(4, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_4"
+					id="habilidad_4"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 47.15%; left: 9%"></select>
+				<select ng-model="habilidad_5"
+					ng-disabled="habilidad_5 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(5, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_5"
+					id="habilidad_5"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 48.8%; left: 9%"></select>
+				<select ng-model="habilidad_6"
+					ng-disabled="habilidad_6 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(6, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_6"
+					id="habilidad_6"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 50.4%; left: 9%"></select>
+				<select ng-model="habilidad_7"
+					ng-disabled="habilidad_7 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(7, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_7"
+					id="habilidad_7"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 52.15%; left: 9%"></select>
+				<select ng-model="habilidad_8"
+					ng-disabled="habilidad_8 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(8, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_8"
+					id="habilidad_8"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 53.8%; left: 9%"></select>
+				<select ng-model="habilidad_8"
+					ng-disabled="habilidad_9 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(9, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_9"
+					id="habilidad_9"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 55.5%; left: 9%"></select>
+				<select ng-model="habilidad_10"
+					ng-disabled="habilidad_10 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(10, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_10"
+					id="habilidad_10"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 57.15%; left: 9%"></select>
+				<select ng-model="habilidad_11"
+					ng-disabled="habilidad_11 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(11, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_11"
+					id="habilidad_11"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 58.8%; left: 9%"></select>
+				<select ng-model="habilidad_12"
+					ng-disabled="habilidad_12 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(12, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_12"
+					id="habilidad_12"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 60.45%; left: 9%"></select>
+				<select ng-model="habilidad_13"
+					ng-disabled="habilidad_13 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(13, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_13"
+					id="habilidad_13"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 62.1%; left: 9%"></select>
+				<select ng-model="habilidad_14"
+					ng-disabled="habilidad_14 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(14, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_14"
+					id="habilidad_14"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 63.85%; left: 9%"></select>
+				<select ng-model="habilidad_15"
+					ng-disabled="habilidad_15 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(15, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_15"
+					id="habilidad_15"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 65.5%; left: 9%"></select>
+				<select ng-model="habilidad_16"
+					ng-disabled="habilidad_16 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(16, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_16"
+					id="habilidad_16"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 67.15%; left: 9%"></select>
+				<select ng-model="habilidad_17"
+					ng-disabled="habilidad_17 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(17, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_17"
+					id="habilidad_17"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 68.9%; left: 9%"></select>
+				<select ng-model="habilidad_18"
+					ng-disabled="habilidad_18 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(18, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_18"
+					id="habilidad_18"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 70.55%; left: 9%"></select>
+				<select ng-model="habilidad_19"
+					ng-disabled="habilidad_19 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(19, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_19"
+					id="habilidad_19"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 72.2%; left: 9%"></select>
+				<select ng-model="habilidad_20"
+					ng-disabled="habilidad_20 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(20, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_20"
+					id="habilidad_20"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 73.85%; left: 9%"></select>
+				<select ng-model="habilidad_21"
+					ng-disabled="habilidad_21 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(21, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_21"
+					id="habilidad_21"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 75.5%; left: 9%"></select>
+				<select ng-model="habilidad_22"
+					ng-disabled="habilidad_22 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(22, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_22"
+					id="habilidad_22"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 77.15%; left: 9%"></select>
+				<select ng-model="habilidad_23"
+					ng-disabled="habilidad_23 != 'Habilidad'"
+					ng-change="pedirDatosHabilidad(23, ' ')"
+					ng-options="option.name as option.value group by option.type for option in habilidadesList_23"
+					id="habilidad_23"
+					style="background: none; height: 1.7%; width: 17%; position: absolute; top: 78.9%; left: 9%"></select>
+
+				<input type="number" max="10" min="1"
+					ng-disabled="habilidad_1 == 'Habilidad'"
+					ng-click="calcularHabilidad(1)" ng-model="rangoHabilidad_1"
+					id="rangoHabilidad_1"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 42.2%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_2 == 'Habilidad'"
+					ng-click="calcularHabilidad(2)" ng-model="rangoHabilidad_2"
+					id="rangoHabilidad_2"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 43.8%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_3 == 'Habilidad'"
+					ng-click="calcularHabilidad(3)" ng-model="rangoHabilidad_3"
+					id="rangoHabilidad_3"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 45.5%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_4 == 'Habilidad'"
+					ng-click="calcularHabilidad(4)" ng-model="rangoHabilidad_4"
+					id="rangoHabilidad_4"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 47.15%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_5 == 'Habilidad'"
+					ng-click="calcularHabilidad(5)" ng-model="rangoHabilidad_5"
+					id="rangoHabilidad_5"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 48.8%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_6 == 'Habilidad'"
+					ng-click="calcularHabilidad(6)" ng-model="rangoHabilidad_6"
+					id="rangoHabilidad_6"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 50.4%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_7 == 'Habilidad'"
+					ng-click="calcularHabilidad(7)" ng-model="rangoHabilidad_7"
+					id="rangoHabilidad_7"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 52.15%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_8 == 'Habilidad'"
+					ng-click="calcularHabilidad(8)" ng-model="rangoHabilidad_8"
+					id="rangoHabilidad_8"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 53.8%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_9 == 'Habilidad'"
+					ng-click="calcularHabilidad(9)" ng-model="rangoHabilidad_9"
+					id="rangoHabilidad_9"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 55.5%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_10 == 'Habilidad'"
+					ng-click="calcularHabilidad(10)" ng-model="rangoHabilidad_10"
+					id="rangoHabilidad_10"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 57.15%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_11 == 'Habilidad'"
+					ng-click="calcularHabilidad(11)" ng-model="rangoHabilidad_11"
+					id="rangoHabilidad_11"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 58.8%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_12 == 'Habilidad'"
+					ng-click="calcularHabilidad(12)" ng-model="rangoHabilidad_12"
+					id="rangoHabilidad_12"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 60.45%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_13 == 'Habilidad'"
+					ng-click="calcularHabilidad(13)" ng-model="rangoHabilidad_13"
+					id="rangoHabilidad_13"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 62.1%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_14 == 'Habilidad'"
+					ng-click="calcularHabilidad(14)" ng-model="rangoHabilidad_14"
+					id="rangoHabilidad_14"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 63.85%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_15 == 'Habilidad'"
+					ng-click="calcularHabilidad(15)" ng-model="rangoHabilidad_15"
+					id="rangoHabilidad_15"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 65.5%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_16 == 'Habilidad'"
+					ng-click="calcularHabilidad(16)" ng-model="rangoHabilidad_16"
+					id="rangoHabilidad_16"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 67.15%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_17 == 'Habilidad'"
+					ng-click="calcularHabilidad(17)" ng-model="rangoHabilidad_17"
+					id="rangoHabilidad_17"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 68.9%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_18 == 'Habilidad'"
+					ng-click="calcularHabilidad(18)" ng-model="rangoHabilidad_18"
+					id="rangoHabilidad_18"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 70.55%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_19 == 'Habilidad'"
+					ng-click="calcularHabilidad(19)" ng-model="rangoHabilidad_19"
+					id="rangoHabilidad_19"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 72.2%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_20 == 'Habilidad'"
+					ng-click="calcularHabilidad(20)" ng-model="rangoHabilidad_20"
+					id="rangoHabilidad_20"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 73.85%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_21 == 'Habilidad'"
+					ng-click="calcularHabilidad(21)" ng-model="rangoHabilidad_21"
+					id="rangoHabilidad_21"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 75.5%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_22 == 'Habilidad'"
+					ng-click="calcularHabilidad(22)" ng-model="rangoHabilidad_22"
+					id="rangoHabilidad_22"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 77.15%; left: 27.5%"
+					value="0"> <input type="number" max="10" min="1"
+					ng-disabled="habilidad_23 == 'Habilidad'"
+					ng-click="calcularHabilidad(23)" ng-model="rangoHabilidad_23"
+					id="rangoHabilidad_23"
+					style="text-align: center; background: none; height: 1.7%; width: 4.5%; position: absolute; top: 78.9%; left: 27.5%"
+					value="0"> <input type="text"
+					ng-model="caracteristicaHabilidad_1" id="caracteristicaHabilidad_1"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 42.2%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_2" id="caracteristicaHabilidad_2"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 43.8%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_3" id="caracteristicaHabilidad_3"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 45.5%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_4" id="caracteristicaHabilidad_4"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 47.15%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_5" id="caracteristicaHabilidad_5"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 48.8%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_6" id="caracteristicaHabilidad_6"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 50.4%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_7" id="caracteristicaHabilidad_7"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 52.15%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_8" id="caracteristicaHabilidad_8"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 53.8%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_9" id="caracteristicaHabilidad_9"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 55.5%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_10"
+					id="caracteristicaHabilidad_10"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 57.15%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_11"
+					id="caracteristicaHabilidad_11"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 58.8%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_12"
+					id="caracteristicaHabilidad_12"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 60.45%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_13"
+					id="caracteristicaHabilidad_13"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 62.1%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_14"
+					id="caracteristicaHabilidad_14"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 63.85%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_15"
+					id="caracteristicaHabilidad_15"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 65.5%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_16"
+					id="caracteristicaHabilidad_16"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 67.15%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_17"
+					id="caracteristicaHabilidad_17"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 68.9%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_18"
+					id="caracteristicaHabilidad_18"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 70.55%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_19"
+					id="caracteristicaHabilidad_19"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 72.2%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_20"
+					id="caracteristicaHabilidad_20"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 73.85%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_21"
+					id="caracteristicaHabilidad_21"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 75.5%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_22"
+					id="caracteristicaHabilidad_22"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 77.15%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					ng-model="caracteristicaHabilidad_23"
+					id="caracteristicaHabilidad_23"
+					style="text-align: center; background: none; height: 1.7%; width: 8.3%; position: absolute; top: 78.9%; left: 32.5%"
+					value="" readonly=""> <input type="text"
+					id="tiradaHabilidad_1"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 42.2%; left: 42%"
+					value="{{tiradaHabilidad_1}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_2"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 43.8%; left: 42%"
+					value="{{tiradaHabilidad_2}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_3"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 45.5%; left: 42%"
+					value="{{tiradaHabilidad_3}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_4"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 47.15%; left: 42%"
+					value="{{tiradaHabilidad_4}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_5"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 48.8%; left: 42%"
+					value="{{tiradaHabilidad_5}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_6"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 50.4%; left: 42%"
+					value="{{tiradaHabilidad_6}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_7"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 52.15%; left: 42%"
+					value="{{tiradaHabilidad_7}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_8"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 53.8%; left: 42%"
+					value="{{tiradaHabilidad_8}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_9"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 55.5%; left: 42%"
+					value="{{tiradaHabilidad_9}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_10"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 57.15%; left: 42%"
+					value="{{tiradaHabilidad_10}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_11"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 58.8%; left: 42%"
+					value="{{tiradaHabilidad_11}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_12"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 60.45%; left: 42%"
+					value="{{tiradaHabilidad_12}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_13"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 62.1%; left: 42%"
+					value="{{tiradaHabilidad_13}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_14"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 63.85%; left: 42%"
+					value="{{tiradaHabilidad_14}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_15"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 65.5%; left: 42%"
+					value="{{tiradaHabilidad_15}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_16"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 67.15%; left: 42%"
+					value="{{tiradaHabilidad_16}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_17"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 68.9%; left: 42%"
+					value="{{tiradaHabilidad_17}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_18"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 70.55%; left: 42%"
+					value="{{tiradaHabilidad_18}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_19"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 72.2%; left: 42%"
+					value="{{tiradaHabilidad_19}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_20"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 73.85%; left: 42%"
+					value="{{tiradaHabilidad_20}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_21"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 75.5%; left: 42%"
+					value="{{tiradaHabilidad_21}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_22"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 77.15%; left: 42%"
+					value="{{tiradaHabilidad_22}}" readonly=""> <input
+					type="text" id="tiradaHabilidad_23"
+					style="text-align: center; background: none; height: 1.7%; width: 9%; position: absolute; top: 78.9%; left: 42%"
+					value="{{tiradaHabilidad_23}}" readonly=""> <select
+					ng-model="especialidadHabilidad_1"
+					ng-options="option.name as option.value for option in especialidadesList_1"
+					id="especialidadHabilidad_1"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 42.2%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_2"
+					ng-options="option.name as option.value for option in especialidadesList_2"
+					id="especialidadHabilidad_2"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 43.8%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_3"
+					ng-options="option.name as option.value for option in especialidadesList_3"
+					id="especialidadHabilidad_3"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 45.5%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_4"
+					ng-options="option.name as option.value for option in especialidadesList_4"
+					id="especialidadHabilidad_4"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 47.15%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_5"
+					ng-options="option.name as option.value for option in especialidadesList_5"
+					id="especialidadHabilidad_5"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 48.8%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_6"
+					ng-options="option.name as option.value for option in especialidadesList_6"
+					id="especialidadHabilidad_6"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 50.4%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_7"
+					ng-options="option.name as option.value for option in especialidadesList_7"
+					id="especialidadHabilidad_7"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 52.15%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_8"
+					ng-options="option.name as option.value for option in especialidadesList_8"
+					id="especialidadHabilidad_8"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 53.8%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_9"
+					ng-options="option.name as option.value for option in especialidadesList_9"
+					id="especialidadHabilidad_9"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 55.5%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_10"
+					ng-options="option.name as option.value for option in especialidadesList_10"
+					id="especialidadHabilidad_10"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 57.15%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_11"
+					ng-options="option.name as option.value for option in especialidadesList_11"
+					id="especialidadHabilidad_11"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 58.8%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_12"
+					ng-options="option.name as option.value for option in especialidadesList_12"
+					id="especialidadHabilidad_12"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 60.45%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_13"
+					ng-options="option.name as option.value for option in especialidadesList_13"
+					id="especialidadHabilidad_13"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 62.1%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_14"
+					ng-options="option.name as option.value for option in especialidadesList_14"
+					id="especialidadHabilidad_14"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 63.85%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_15"
+					ng-options="option.name as option.value for option in especialidadesList_15"
+					id="especialidadHabilidad_15"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 65.5%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_16"
+					ng-options="option.name as option.value for option in especialidadesList_16"
+					id="especialidadHabilidad_16"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 67.15%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_17"
+					ng-options="option.name as option.value for option in especialidadesList_17"
+					id="especialidadHabilidad_17"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 68.9%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_18"
+					ng-options="option.name as option.value for option in especialidadesList_18"
+					id="especialidadHabilidad_18"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 70.55%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_19"
+					ng-options="option.name as option.value for option in especialidadesList_19"
+					id="especialidadHabilidad_19"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 72.2%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_20"
+					ng-options="option.name as option.value for option in especialidadesList_20"
+					id="especialidadHabilidad_20"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 73.85%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_21"
+					ng-options="option.name as option.value for option in especialidadesList_21"
+					id="especialidadHabilidad_21"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 75.5%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_22"
+					ng-options="option.name as option.value for option in especialidadesList_22"
+					id="especialidadHabilidad_22"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 77.15%; left: 52.5%"></select>
+				<select ng-model="especialidadHabilidad_23"
+					ng-options="option.name as option.value for option in especialidadesList_23"
+					id="especialidadHabilidad_23"
+					style="background: none; height: 1.7%; width: 12.7%; position: absolute; top: 78.9%; left: 52.5%"></select>
+			</div>
+
+			<!-- Sección con las armas - Se rellenan gracias a Oracle -->
+			<div id="armas">
+				<div id="arma1">
+					<select id="arma1Tipo" ng-change="calcularArma1()"
+						ng-model="arma1Tipo"
+						ng-options="option.name as option.value group by option.type for option in armasList"
+						style="background: none; width: 11.3%; position: absolute; top: 84.1%; left: 14.2%"></select>
+					<input type="text" ng-model="arma1Tirada" id="arma1Tirada"
+						style="text-align: center; background: none; height: 2%; width: 11.27%; position: absolute; top: 85.93%; left: 14.1%"
+						readonly=""> <input type="number" ng-model="arma1X"
+						style="display: none; position: absolute; bottom: 0%"> <input
+						type="number" ng-model="arma1Y"
+						style="display: none; position: absolute; bottom: 0%"> <input
+						type="text"
+						value="{{(arma1BonusX+arma1X) + 'G' + (arma1BonusY+arma1Y)}}"
+						id="arma1Daño"
+						style="text-align: center; background: none; height: 2%; width: 11.27%; position: absolute; top: 87.93%; left: 14.1%"
+						readonly=""> <input type="number" min="0" max="20"
+						ng-model="arma1BonusX" id="arma1BonusX"
+						style="text-align: center; background: none; height: 2%; width: 3.75%; position: absolute; top: 89.93%; left: 14.1%">
+					<input type="text" value="G" id="arma1BonusG"
+						style="text-align: center; background: none; height: 2%; width: 3.75%; position: absolute; top: 89.93%; left: 17.85%"
+						readonly=""> <input type="number" min="0" max="20"
+						ng-model="arma1BonusY" id="arma1BonusY"
+						style="text-align: center; background: none; height: 2%; width: 3.7%; position: absolute; top: 89.93%; left: 21.6%">
+					<input type="text" ng-model="arma1Notas" id="arma1Notas"
+						style="text-align: center; background: none; width: 11.27%; height: 3.8%; position: absolute; top: 91.93%; left: 14.1%"
+						readonly="">
+				</div>
+				<div id="arma2">
+					<select id="arma2Tipo" ng-change="calcularArma2()"
+						ng-model="arma2Tipo"
+						ng-options="option.name as option.value group by option.type for option in armas2List"
+						style="background: none; width: 11.3%; position: absolute; top: 84.1%; left: 34.2%"></select>
+					<input type="text" ng-model="arma2Tirada" id="arma2Tirada"
+						style="text-align: center; background: none; height: 2%; width: 11.2%; position: absolute; top: 85.93%; left: 34%"
+						readonly=""> <input type="number" ng-model="arma2X"
+						style="display: none; position: absolute; bottom: 0%"> <input
+						type="number" ng-model="arma2Y"
+						style="display: none; position: absolute; bottom: 0%"> <input
+						type="text"
+						value="{{(arma2BonusX+arma2X) + 'G' + (arma2BonusY+arma2Y)}}"
+						id="arma2Daño"
+						style="text-align: center; background: none; height: 2%; width: 11.2%; position: absolute; top: 87.93%; left: 34%"
+						readonly=""> <input type="number" min="0" max="20"
+						ng-model="arma2BonusX" ng-change="calcularFlechas()"
+						id="arma2BonusX"
+						style="text-align: center; background: none; height: 2%; width: 3.75%; position: absolute; top: 89.93%; left: 34%">
+					<input type="text" value="G" id="arma2BonusG"
+						style="text-align: center; background: none; height: 2%; width: 3.75%; position: absolute; top: 89.93%; left: 37.75%"
+						readonly=""> <input type="number" min="0" max="20"
+						ng-model="arma2BonusY" ng-change="calcularFlechas()"
+						id="arma2BonusY"
+						style="text-align: center; background: none; height: 2%; width: 3.7%; position: absolute; top: 89.93%; left: 41.5%">
+					<input type="text" ng-model="arma2Notas" id="arma2Notas"
+						style="text-align: center; background: none; width: 11.2%; height: 3.8%; position: absolute; top: 91.93%; left: 34%"
+						readonly="">
+				</div>
+				<div id="flechas">
+					<select id="flechasTipo_1" ng-change="calcularFlecha(1)"
+						ng-model="flechasTipo_1"
+						ng-options="option.name as option.value group by option.type for option in flechasList"
+						style="background: none; width: 6.6%; height: 2%; position: absolute; top: 85.95%; left: 45.9%"></select>
+					<select id="flechasTipo_2" ng-change="calcularFlecha(2)"
+						ng-model="flechasTipo_2"
+						ng-options="option.name as option.value group by option.type for option in flechasList"
+						style="background: none; width: 6.6%; height: 2%; position: absolute; top: 87.95%; left: 45.9%"></select>
+					<select id="flechasTipo_3" ng-change="calcularFlecha(3)"
+						ng-model="flechasTipo_3"
+						ng-options="option.name as option.value group by option.type for option in flechasList"
+						style="background: none; width: 6.6%; height: 2%; position: absolute; top: 89.95%; left: 45.9%"></select>
+					<select id="flechasTipo_4" ng-change="calcularFlecha(4)"
+						ng-model="flechasTipo_4"
+						ng-options="option.name as option.value group by option.type for option in flechasList"
+						style="background: none; width: 6.6%; height: 1.9%; position: absolute; top: 91.95%; left: 45.9%"></select>
+					<select id="flechasTipo_5" ng-change="calcularFlecha(5)"
+						ng-model="flechasTipo_5"
+						ng-options="option.name as option.value group by option.type for option in flechasList"
+						style="background: none; width: 6.6%; height: 1.9%; position: absolute; top: 93.93%; left: 45.9%"></select>
+
+					<input type="text" ng-model="flechasDano_1" id="flechasDaño_1"
+						style="text-align: center; background: none; height: 2%; width: 6.6%; position: absolute; top: 85.95%; left: 52.6%"
+						readonly=""> <input type="text" ng-model="flechasDano_2"
+						id="flechasDaño_2"
+						style="text-align: center; background: none; height: 2%; width: 6.6%; position: absolute; top: 87.95%; left: 52.6%"
+						readonly=""> <input type="text" ng-model="flechasDano_3"
+						id="flechasDaño_3"
+						style="text-align: center; background: none; height: 2%; width: 6.6%; position: absolute; top: 89.95%; left: 52.6%"
+						readonly=""> <input type="text" ng-model="flechasDano_4"
+						id="flechasDaño_4"
+						style="text-align: center; background: none; height: 1.9%; width: 6.6%; position: absolute; top: 91.95%; left: 52.6%"
+						readonly=""> <input type="text" ng-model="flechasDano_5"
+						id="flechasDaño_5"
+						style="text-align: center; background: none; height: 1.9%; width: 6.6%; position: absolute; top: 93.93%; left: 52.6%"
+						readonly=""> <input type="number" max="30" min="0"
+						id="flechasCantidad_1" value=""
+						style="text-align: center; height: 2%; width: 6.7%; height: 2%; background: none; position: absolute; top: 85.95%; left: 59.35%">
+					<input type="number" max="30" min="0" id="flechasCantidad_2"
+						value=""
+						style="text-align: center; height: 2%; width: 6.7%; height: 2%; background: none; position: absolute; top: 87.95%; left: 59.35%">
+					<input type="number" max="30" min="0" id="flechasCantidad_3"
+						value=""
+						style="text-align: center; height: 2%; width: 6.7%; height: 2%; background: none; position: absolute; top: 89.95%; left: 59.35%">
+					<input type="number" max="30" min="0" id="flechasCantidad_4"
+						value=""
+						style="text-align: center; height: 2%; width: 6.7%; height: 1.9%; background: none; position: absolute; top: 91.95%; left: 59.35%">
+					<input type="number" max="30" min="0" id="flechasCantidad_5"
+						value=""
+						style="text-align: center; height: 1.9%; width: 6.7%; height: 1.9%; background: none; position: absolute; top: 93.93%; left: 59.35%">
+				</div>
+			</div>
+
+			<!-- Sección derecha de la página -->
+			<div id="seccionDerecha">
+				<div id="iniciativa">
+					<input type="text" value="{{(reflejos+rango) + 'G' + reflejos}}"
+						id="iniciativaIni" size="11%"
+						style="text-align: center; height: 2%; background: none; position: absolute; top: 41.8%; left: 81.3%"
+						readonly=""> <input type="number" min="0" max="10"
+						ng-model="iniciativaModX" id="iniciativaMod"
+						style="text-align: center; height: 2%; width: 4%; background: none; position: absolute; top: 43.6%; left: 81.3%">
+					<input type="text" value="G" id="iniciativaMod" size="1%"
+						style="text-align: center; height: 2%; background: none; position: absolute; top: 43.6%; left: 85.3%"
+						readonly=""> <input type="number" min="0" max="10"
+						ng-model="iniciativaModY" id="iniciativaMod" size="11%"
+						style="text-align: center; height: 2%; width: 4%; background: none; position: absolute; top: 43.6%; left: 90.3%">
+					<input type="text"
+						value="{{(reflejos+rango+iniciativaModX) + 'G' + (reflejos+iniciativaModY)}}"
+						id="iniciativaFin" size="11%"
+						style="text-align: center; height: 2%; background: none; position: absolute; top: 45.5%; left: 81.3%"
+						readonly="">
+				</div>
+				<div id="noArmadura">
+					<input type="number" min="0" max="20" ng-model="armBonif2"
+						id="noIni" size="11%"
+						style="text-align: center; height: 2%; width: 13%; background: none; position: absolute; top: 49.3%; left: 81.3%">
+					<input type="text" ng-model="reduccion" id="reduccion" size="11%"
+						style="text-align: center; height: 2%; background: none; position: absolute; top: 51.2%; left: 81.3%"
+						readonly=""> <input type="text"
+						value="{{(reflejos*5+5)+armBonif+armBonif2}}" id="noFin"
+						size="11%"
+						style="text-align: center; height: 2%; background: none; position: absolute; top: 53.1%; left: 81.3%"
+						readonly="">
+				</div>
+				<div id="armadura">
+					<input type="number" ng-model="armBonif" id="armBonif"
+						style="text-align: center; height: 2%; width: 13%; background: none; position: absolute; top: 56.7%; left: 81.3%"
+						readonly=""> <select id="armTipo" ng-model="armTipo"
+						ng-options="option.name as option.value group by option.type for option in armadurasList"
+						ng-change="calcularArmadura()"
+						style="background: none; width: 13.4%; position: absolute; top: 58.6%; left: 81.3%">
+					</select> <input type="text" ng-model="armNotas" id="armNotas" size="11%"
+						style="text-align: center; height: 2%; background: none; position: absolute; top: 60.35%; left: 81.3%"
+						readonly="">
+				</div>
+				<div id="vida">
+					<select id="multiplicador" ng-model="multiplicador"
+						style="border-style: solid; height: 2.8%; width: 13.4%; text-align-last: center; background: none; position: absolute; top: 64%; left: 81.3%">
+						<option selected>2</option>
+						<option>3</option>
+						<option>4</option>
+						<option>5</option>
+					</select> <input type="number" min="-10" max="20" ng-model="heridasMod_Ini"
+						id="heridasMod_Ini" size="11%"
+						style="text-align: center; height: 2.4%; width: 7.2%; background: none; position: absolute; top: 68.6%; left: 77.8%">
+					<input type="number" min="-10" max="20" ng-model="heridasMod_1"
+						id="heridasMod_1" size="11%"
+						style="text-align: center; height: 2.4%; width: 7.2%; background: none; position: absolute; top: 71.05%; left: 77.8%">
+					<input type="number" min="-10" max="20" ng-model="heridasMod_2"
+						id="heridasMod_2" size="11%"
+						style="text-align: center; height: 2.4%; width: 7.2%; background: none; position: absolute; top: 73.5%; left: 77.8%">
+					<input type="number" min="-10" max="20" ng-model="heridasMod_3"
+						id="heridasMod_3" size="11%"
+						style="text-align: center; height: 2.4%; width: 7.2%; background: none; position: absolute; top: 76%; left: 77.8%">
+					<input type="number" min="-10" max="20" ng-model="heridasMod_4"
+						id="heridasMod_4" size="11%"
+						style="text-align: center; height: 2.4%; width: 7.2%; background: none; position: absolute; top: 78.55%; left: 77.8%">
+					<input type="number" min="-10" max="20" ng-model="heridasMod_5"
+						id="heridasMod_5" size="11%"
+						style="text-align: center; height: 2.4%; width: 7.2%; background: none; position: absolute; top: 81.05%; left: 77.8%">
+					<input type="number" min="-10" max="20" ng-model="heridasMod_6"
+						id="heridasMod_6" size="11%"
+						style="text-align: center; height: 2.4%; width: 7.2%; background: none; position: absolute; top: 83.5%; left: 77.8%">
+					<input type="number" min="-10" max="20" ng-model="heridasMod_7"
+						id="heridasMod_7" size="11%"
+						style="text-align: center; height: 2.4%; width: 7.2%; background: none; position: absolute; top: 86.1%; left: 77.8%">
+
+					<input type="number" value="{{tierra*5}}" id="heridasIni"
+						style="text-align: center; height: 2.3%; width: 4.4%; background: none; position: absolute; top: 68.6%; left: 85.3%"
+						readonly=""> <input type="number"
+						value="{{tierra*multiplicador}}" id="heridas_1"
+						style="text-align: center; height: 2.3%; width: 4.4%; background: none; position: absolute; top: 71.05%; left: 85.3%"
+						readonly=""> <input type="number"
+						value="{{tierra*multiplicador}}" id="heridas_2"
+						style="text-align: center; height: 2.3%; width: 4.4%; background: none; position: absolute; top: 73.5%; left: 85.3%"
+						readonly=""> <input type="number"
+						value="{{tierra*multiplicador}}" id="heridas_3"
+						style="text-align: center; height: 2.3%; width: 4.4%; background: none; position: absolute; top: 76%; left: 85.3%"
+						readonly=""> <input type="number"
+						value="{{tierra*multiplicador}}" id="heridas_4"
+						style="text-align: center; height: 2.3%; width: 4.4%; background: none; position: absolute; top: 78.55%; left: 85.3%"
+						readonly=""> <input type="number"
+						value="{{tierra*multiplicador}}" id="heridas_5"
+						style="text-align: center; height: 2.3%; width: 4.4%; background: none; position: absolute; top: 81.05%; left: 85.3%"
+						readonly=""> <input type="number"
+						value="{{tierra*multiplicador}}" id="heridas_6"
+						style="text-align: center; height: 2.3%; width: 4.4%; background: none; position: absolute; top: 83.5%; left: 85.3%"
+						readonly=""> <input type="number"
+						value="{{tierra*multiplicador}}" id="heridas_7"
+						style="text-align: center; height: 2.3%; width: 4.4%; background: none; position: absolute; top: 86.1%; left: 85.3%"
+						readonly=""> <input type="number"
+						value="{{heridasMod_Ini + (tierra*5)}}" id="heridasFin_Ini"
+						size="11%"
+						style="text-align: center; height: 2.4%; width: 4.7%; background: none; position: absolute; top: 68.6%; left: 89.7%"
+						readonly=""> <input type="number"
+						value="{{heridasMod_1 + (tierra*multiplicador)}}"
+						id="heridasFin_1" size="11%"
+						style="text-align: center; height: 2.4%; width: 4.7%; background: none; position: absolute; top: 71.05%; left: 89.7%"
+						readonly=""> <input type="number"
+						value="{{heridasMod_2 + (tierra*multiplicador)}}"
+						id="heridasFin_2" size="11%"
+						style="text-align: center; height: 2.4%; width: 4.7%; background: none; position: absolute; top: 73.5%; left: 89.7%"
+						readonly=""> <input type="number"
+						value="{{heridasMod_3 + (tierra*multiplicador)}}"
+						id="heridasFin_3" size="11%"
+						style="text-align: center; height: 2.4%; width: 4.7%; background: none; position: absolute; top: 76%; left: 89.7%"
+						readonly=""> <input type="number"
+						value="{{heridasMod_4 + (tierra*multiplicador)}}"
+						id="heridasFin_4" size="11%"
+						style="text-align: center; height: 2.4%; width: 4.7%; background: none; position: absolute; top: 78.55%; left: 89.7%"
+						readonly=""> <input type="number"
+						value="{{heridasMod_5 + (tierra*multiplicador)}}"
+						id="heridasFin_5" size="11%"
+						style="text-align: center; height: 2.4%; width: 4.7%; background: none; position: absolute; top: 81.05%; left: 89.7%"
+						readonly=""> <input type="number"
+						value="{{heridasMod_6 + (tierra*multiplicador)}}"
+						id="heridasFin_6" size="11%"
+						style="text-align: center; height: 2.4%; width: 4.7%; background: none; position: absolute; top: 83.5%; left: 89.7%"
+						readonly=""> <input type="number"
+						value="{{heridasMod_7 + (tierra*multiplicador)}}"
+						id="heridasFin_7" size="11%"
+						style="text-align: center; height: 2.4%; width: 4.7%; background: none; position: absolute; top: 86.1%; left: 89.7%"
+						readonly="">
+				</div>
+				<div id="curacion">
+					<input type="text" value="{{resistencia*2 + rango}}"
+						id="curacionIni"
+						style="text-align: center; height: 1.75%; width: 11%; background: none; position: absolute; top: 90.25%; left: 83.5%"
+						readonly=""> <input type="number" min="0" max="20"
+						ng-model="curacionMod" id="curacionMod"
+						style="text-align: center; height: 1.75%; width: 11%; background: none; position: absolute; top: 92.05%; left: 83.5%">
+					<input type="text"
+						value="{{(resistencia*2 + rango) + (curacionMod)}}"
+						id="curacionFin"
+						style="text-align: center; height: 1.75%; width: 11%; background: none; position: absolute; top: 93.85%; left: 83.5%"
+						readonly="">
+				</div>
+			</div>
+		</div>
+
+		<!-- Botón que activa el modal de instrucciones -->
+		<button type="button" id="botonInstrucciones" class="btn-lg"
+			data-toggle="modal" data-target="#instrucciones"
+			style="margin-left: 5%; position: absolute; top: 17%; left: 15%; z-index: 1">
+			<span class="glyphicon glyphicon-book"></span>
+		</button>
+		<!-- Calcula todos los datos en función del clan y la escuela -->
+		<button type="button" id="calculoFicha" class="btn-lg"
+			ng-click="calcularFicha()"
+			style="margin-left: 5%; position: absolute; top: 25%; left: 15%;; z-index: 1">
+			<span class="glyphicon glyphicon-play-circle"></span>
+		</button>
+
+		<footer class="footer">
+			<div align="center" class="container"
+				style="width: auto; padding: 0 15px;">
+				<p class="text-muted" style="margin: 20px 0;">Copyright (c)
+					Jorge López Yagüe 2016</p>
+			</div>
+		</footer>
+	</div>
+</body>
+</html>
