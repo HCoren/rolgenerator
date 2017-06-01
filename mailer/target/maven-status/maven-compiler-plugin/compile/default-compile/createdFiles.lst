@@ -1,0 +1,4 @@
+com\rolgenerator\MailerApp.class
+com\rolgenerator\bean\DatosMail.class
+com\rolgenerator\RestHomeController.class
+com\rolgenerator\PhraseRetriever.class
