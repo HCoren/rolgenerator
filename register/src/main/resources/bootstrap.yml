@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: register
+  config:
+    name: register
+  cloud:
+    config:
+      uri: http://localhost:8888
+      username: user
+      password: s3cret

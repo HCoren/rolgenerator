@@ -1,0 +1,8 @@
+com\rolgenerator\repositories\UsersRepository.class
+com\rolgenerator\entities\Users.class
+com\rolgenerator\RestHomeController.class
+com\rolgenerator\entities\UserRoles.class
+com\rolgenerator\RegisterApp.class
+com\rolgenerator\repositories\UserRolesRepository.class
+com\rolgenerator\PhraseRetriever.class
+com\rolgenerator\dto\UserDTO.class
