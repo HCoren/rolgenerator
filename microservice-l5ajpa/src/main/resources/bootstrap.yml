@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: l5ajpamicroservice
+  config:
+    name: l5ajpamicroservice
+  cloud:
+    config:
+      uri: http://localhost:8888
+      username: user
+      password: s3cret
