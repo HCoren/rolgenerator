@@ -1,0 +1,8 @@
+com\rolgenerator\RestHomeController.class
+com\rolgenerator\entities\Armas.class
+com\rolgenerator\repositories\ProfesionesRepository.class
+com\rolgenerator\entities\Profesiones.class
+com\rolgenerator\repositories\ArmasRepository.class
+com\rolgenerator\PhraseRetriever.class
+com\rolgenerator\bean\Index.class
+com\rolgenerator\JpaApp.class
