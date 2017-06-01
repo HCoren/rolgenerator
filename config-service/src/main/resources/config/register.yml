@@ -1,0 +1,10 @@
+server:
+  port: 9500
+  
+spring:
+  application:
+    name: register
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/users
+    username: admin
+    password: admin

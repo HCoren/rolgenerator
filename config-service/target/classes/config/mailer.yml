@@ -1,0 +1,9 @@
+server:
+  port: 9400
+  
+spring:
+  application:
+    name: mailer
+  mail:
+    host: localhost
+    port: 25

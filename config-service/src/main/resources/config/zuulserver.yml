@@ -1,0 +1,28 @@
+server:
+  port: 8080
+  
+spring:
+   config:
+      name:  zuulserver
+   application:
+      name:  zuulserver
+zuul:
+  routes:
+    route1:
+      path: /l5ajpamicroservice/**
+      serviceId: l5ajpamicroservice
+    route2:
+      path: /cthulhujpamicroservice/**
+      serviceId: cthulhujpamicroservice
+    route3:
+      path: /mailer/**
+      serviceId: mailer
+    route4:
+      path: /register/**
+      serviceId: register
+    route5:
+      path: /downloader/**
+      serviceId: downloader
+error:
+  whitelabel:
+    enabled:false

@@ -1,0 +1,10 @@
+server:
+  port: 9300
+  
+spring:
+  application:
+    name: l5ajpamicroservice
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/l5a
+    username: admin
+    password: admin
