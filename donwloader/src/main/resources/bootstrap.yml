@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: downloader
+  config:
+    name: downloader
+  cloud:
+    config:
+      uri: http://localhost:8888
+      username: user
+      password: s3cret
