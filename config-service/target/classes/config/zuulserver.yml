@@ -23,6 +23,9 @@ zuul:
     route5:
       path: /downloader/**
       serviceId: downloader
+    route6:
+      path: /home
+      url: http://localhost:9100/home.html
 error:
   whitelabel:
     enabled:false

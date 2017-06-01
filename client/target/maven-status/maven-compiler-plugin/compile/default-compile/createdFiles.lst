@@ -1,7 +1,6 @@
 com\rolgenerator\dto\DatosMailDTO.class
 com\rolgenerator\utils\RestUtilsController.class
 com\rolgenerator\config\security\filters\xss\CacheableObject.class
-com\rolgenerator\RestHomeController.class
 com\rolgenerator\config\security\filters\XSSFilter.class
 com\rolgenerator\l5a\L5aClient.class
 com\rolgenerator\config\security\filters\xss\XSSRequestWrapper.class

@@ -11,17 +11,25 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rolgenerator.dto.DescargaDTO;
 
+// TODO: Auto-generated Javadoc
 /**
- * @author Jorge López
+ * The Class RestDescargasController.
  *
  */
 @RestController
 @CrossOrigin
 public class RestDescargasController {
 
+	/** The phrase retriever. */
 	@Autowired
 	private PhraseDescargasRetriever phraseRetriever;
 
+	/**
+	 * Descargar.
+	 *
+	 * @param descarga the descarga
+	 * @return the byte[]
+	 */
 	@RequestMapping(value = "/descargar")
 	public byte[] descargar(@RequestBody DescargaDTO descarga) {
 		return phraseRetriever.descargar(descarga);

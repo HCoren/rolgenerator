@@ -9,6 +9,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ZuulServerApp.
+ */
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration(exclude = {ErrorMvcAutoConfiguration.class})
@@ -16,6 +20,12 @@ import org.springframework.context.annotation.Configuration;
 @EnableZuulProxy
 public class ZuulServerApp 
 {
+    
+    /**
+     * The main method.
+     *
+     * @param args the arguments
+     */
     public static void main( String[] args )
     {
     	SpringApplication.run(ZuulServerApp.class, args);

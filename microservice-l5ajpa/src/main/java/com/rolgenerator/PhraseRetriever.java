@@ -25,26 +25,52 @@ import com.rolgenerator.repositories.FamiliasRepository;
 import com.rolgenerator.repositories.FlechasRepository;
 import com.rolgenerator.repositories.HabilidadesRepository;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PhraseRetriever.
+ */
 @Component
 public class PhraseRetriever {
 
+	/** The armaduras. */
 	@Autowired
 	ArmadurasRepository armaduras;
+	
+	/** The armas. */
 	@Autowired
 	ArmasRepository armas;
+	
+	/** The bonificadores familia. */
 	@Autowired
 	BonificadoresFamiliaRepository bonificadoresFamilia;
+	
+	/** The datos escuela. */
 	@Autowired
 	DatosEscuelaRepository datosEscuela;
+	
+	/** The familias. */
 	@Autowired
 	FamiliasRepository familias;
+	
+	/** The escuelas. */
 	@Autowired
 	EscuelasRepository escuelas;
+	
+	/** The flechas. */
 	@Autowired
 	FlechasRepository flechas;
+	
+	/** The habilidades. */
 	@Autowired
 	HabilidadesRepository habilidades;
 
+	/**
+	 * Retrieve armaduras.
+	 *
+	 * @param armadura the armadura
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackArmaduras")
 	public String retrieveArmaduras(String armadura) throws JSONException {
 		Armaduras a = armaduras.findOne(armadura);
@@ -57,6 +83,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve armas.
+	 *
+	 * @param arma the arma
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackArmas")
 	public String retrieveArmas(String arma) throws JSONException {
 		Armas a = armas.findOne(arma);
@@ -69,6 +102,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve bonificadores familia.
+	 *
+	 * @param familia the familia
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackBonificadoresFamilia")
 	public String retrieveBonificadoresFamilia(String familia) throws JSONException {
 		BonificadoresFamilia b = bonificadoresFamilia.findOne(familia);
@@ -79,6 +119,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve datos escuela.
+	 *
+	 * @param escuela the escuela
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackDatosEscuela")
 	public String retrieveDatosEscuela(String escuela) throws JSONException {
 		DatosEscuela d = datosEscuela.findOne(escuela);
@@ -93,6 +140,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve familias.
+	 *
+	 * @param clan the clan
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackFamilias")
 	public String retrieveFamilias(String clan) throws JSONException {
 		Familias f = familias.findOne(clan);
@@ -107,6 +161,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve escuelas.
+	 *
+	 * @param clan the clan
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackEscuelas")
 	public String retrieveEscuelas(String clan) throws JSONException {
 		Escuelas e = escuelas.findOne(clan);
@@ -118,6 +179,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve flechas.
+	 *
+	 * @param flecha the flecha
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackFlechas")
 	public String retrieveFlechas(String flecha) throws JSONException {
 		Flechas f = flechas.findOne(flecha);
@@ -128,6 +196,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve habilidades.
+	 *
+	 * @param habilidad the habilidad
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackHabilidades")
 	public String retrieveHabilidades(String habilidad) throws JSONException {
 		Habilidades h = habilidades.findOne(habilidad);
@@ -140,48 +215,96 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 
+	/**
+	 * Retrieve fallback armaduras.
+	 *
+	 * @param armadura the armadura
+	 * @return the string
+	 */
 	public String retrieveFallbackArmaduras(String armadura) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("Armadura", "Armadura");
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve fallback armas.
+	 *
+	 * @param arma the arma
+	 * @return the string
+	 */
 	public String retrieveFallbackArmas(String arma) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("arma", "Arma");
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve fallback bonificadores familia.
+	 *
+	 * @param familia the familia
+	 * @return the string
+	 */
 	public String retrieveFallbackBonificadoresFamilia(String familia) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("Familia", "Familia");
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve fallback datos escuela.
+	 *
+	 * @param escuela the escuela
+	 * @return the string
+	 */
 	public String retrieveFallbackDatosEscuela(String escuela) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("Escuela", "Escuela");
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve fallback familias.
+	 *
+	 * @param clan the clan
+	 * @return the string
+	 */
 	public String retrieveFallbackFamilias(String clan) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("Familia", "Familia");
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve fallback escuelas.
+	 *
+	 * @param escuela the escuela
+	 * @return the string
+	 */
 	public String retrieveFallbackEscuelas(String escuela) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("Escuela", "Escuela");
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve fallback flechas.
+	 *
+	 * @param flecha the flecha
+	 * @return the string
+	 */
 	public String retrieveFallbackFlechas(String flecha) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("Flecha", "Flecha");
 		return new JSONObject(map).toString();
 	}
 	
+	/**
+	 * Retrieve fallback habilidades.
+	 *
+	 * @param habilidad the habilidad
+	 * @return the string
+	 */
 	public String retrieveFallbackHabilidades(String habilidad) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("Habilidad", "Habilidad");

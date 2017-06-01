@@ -13,14 +13,28 @@ import com.rolgenerator.entities.Profesiones;
 import com.rolgenerator.repositories.ArmasRepository;
 import com.rolgenerator.repositories.ProfesionesRepository;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PhraseRetriever.
+ */
 @Component
 public class PhraseRetriever {
 
+	/** The profesiones. */
 	@Autowired
 	ProfesionesRepository profesiones;
+	
+	/** The armas. */
 	@Autowired
 	ArmasRepository armas;
 
+	/**
+	 * Retrieve armas.
+	 *
+	 * @param arma the arma
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackArmas")
 	public String retrieveArmas(String arma) throws JSONException {
 		Armas a = armas.findOne(arma);
@@ -38,6 +52,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 
+	/**
+	 * Retrieve profesiones.
+	 *
+	 * @param profesion the profesion
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackProfesiones")
 	public String retrieveProfesiones(String profesion) throws JSONException {
 		Profesiones p = profesiones.findOne(profesion);
@@ -55,12 +76,24 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 
+	/**
+	 * Retrieve fallback armas.
+	 *
+	 * @param arma the arma
+	 * @return the string
+	 */
 	public String retrieveFallbackArmas(String arma) {
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("arma", "Arma");
 		return new JSONObject(map).toString();
 	}
 
+	/**
+	 * Retrieve fallback profesiones.
+	 *
+	 * @param profesion the profesion
+	 * @return the string
+	 */
 	public String retrieveFallbackProfesiones(String profesion) {
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("profesion", "Profesion");

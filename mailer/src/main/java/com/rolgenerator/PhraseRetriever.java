@@ -14,16 +14,28 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.rolgenerator.bean.DatosMail;
+import com.rolgenerator.dto.DatosMailDTO;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PhraseRetriever.
+ */
 @Component
 public class PhraseRetriever {
 
+	/** The java mail sender. */
 	@Autowired
 	private JavaMailSender javaMailSender;
 
+	/**
+	 * Send mail.
+	 *
+	 * @param datosMail the datos mail
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackMailer")
-	public String sendMail(DatosMail datosMail) throws JSONException {
+	public String sendMail(DatosMailDTO datosMail) throws JSONException {
 		MimeMessage mail = javaMailSender.createMimeMessage();
 		try {
 			MimeMessageHelper helper = new MimeMessageHelper(mail, true);
@@ -45,7 +57,13 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 
-	public String retrieveFallbackMailer(DatosMail index) {
+	/**
+	 * Retrieve fallback mailer.
+	 *
+	 * @param index the index
+	 * @return the string
+	 */
+	public String retrieveFallbackMailer(DatosMailDTO index) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("resultado", "Ha surgido algún error durante el proceso de alta");
 		return new JSONObject(map).toString();

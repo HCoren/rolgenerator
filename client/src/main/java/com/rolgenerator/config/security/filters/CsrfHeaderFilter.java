@@ -12,7 +12,15 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CsrfHeaderFilter.
+ */
 public class CsrfHeaderFilter extends OncePerRequestFilter {
+	
+	/* (non-Javadoc)
+	 * @see org.springframework.web.filter.OncePerRequestFilter#doFilterInternal(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.servlet.FilterChain)
+	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {

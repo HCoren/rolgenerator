@@ -7,9 +7,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MvcConfig.
+ */
 @Configuration
 public class MvcConfig extends WebMvcConfigurerAdapter {
 
+	/**
+	 * Data source.
+	 *
+	 * @return the driver manager data source
+	 */
 	@Bean(name = "datasource")
 	public DriverManagerDataSource dataSource() {
 		DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
@@ -22,6 +31,11 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
 		return driverManagerDataSource;
 	}
 
+	/**
+	 * User details service.
+	 *
+	 * @return the user details service
+	 */
 	@Bean(name = "userDetailsService")
 	public UserDetailsService userDetailsService() {
 		JdbcDaoImpl jdbcImpl = new JdbcDaoImpl();

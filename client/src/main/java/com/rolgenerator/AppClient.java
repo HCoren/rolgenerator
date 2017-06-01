@@ -7,6 +7,10 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class AppClient.
+ */
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
@@ -14,6 +18,11 @@ import org.springframework.context.annotation.Configuration;
 @EnableFeignClients
 public class AppClient {
 
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(AppClient.class, args);
 	}

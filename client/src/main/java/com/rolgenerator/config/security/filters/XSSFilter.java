@@ -12,8 +12,15 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import com.rolgenerator.config.security.filters.xss.XSSRequestWrapper;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class XSSFilter.
+ */
 public class XSSFilter extends GenericFilterBean {
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+	 */
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		chain.doFilter(new XSSRequestWrapper((HttpServletRequest) request), response);

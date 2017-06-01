@@ -16,9 +16,20 @@ import org.springframework.stereotype.Component;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PhraseRetriever.
+ */
 @Component
 public class PhraseRetriever {
 
+	/**
+	 * Download.
+	 *
+	 * @param documento the documento
+	 * @return the byte[]
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackDownload")
 	public byte[] download(int documento) throws IOException {
 		ClassPathResource pdfFile = null;
@@ -53,11 +64,25 @@ public class PhraseRetriever {
 		return resultado;
 	}
 
+	/**
+	 * Retrieve fallback download.
+	 *
+	 * @param documento the documento
+	 * @return the byte[]
+	 */
 	public byte[] retrieveFallbackDownload(int documento) {
 		System.out.println("Algo ha ido mal");
 		return null;
 	}
 
+	/**
+	 * Convert stream to byte array.
+	 *
+	 * @param stream the stream
+	 * @param size the size
+	 * @return the byte[]
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public byte[] convertStreamToByteArray(BufferedInputStream stream, long size) throws IOException {
 
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();

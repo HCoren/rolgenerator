@@ -15,14 +15,28 @@ import com.rolgenerator.entities.Users;
 import com.rolgenerator.repositories.UserRolesRepository;
 import com.rolgenerator.repositories.UsersRepository;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PhraseRetriever.
+ */
 @Component
 public class PhraseRetriever {
 
+	/** The users. */
 	@Autowired
 	UsersRepository users;
+	
+	/** The user roles. */
 	@Autowired
 	UserRolesRepository userRoles;
 
+	/**
+	 * New user.
+	 *
+	 * @param userDTO the user DTO
+	 * @return the string
+	 * @throws JSONException the JSON exception
+	 */
 	@HystrixCommand(fallbackMethod = "retrieveFallbackNewUser")
 	public String newUser(UserDTO userDTO) throws JSONException {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -44,6 +58,12 @@ public class PhraseRetriever {
 		return new JSONObject(map).toString();
 	}
 
+	/**
+	 * Retrieve fallback new user.
+	 *
+	 * @param userDTO the user DTO
+	 * @return the string
+	 */
 	public String retrieveFallbackNewUser(UserDTO userDTO) {
 		HashMap <String, String> map = new HashMap <String, String>();
 		map.put("resultado", "Ha surgido algún error durante el proceso de alta");
